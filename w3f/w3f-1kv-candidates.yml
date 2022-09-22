@@ -1,0 +1,36 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+
+  w3f-1kv-candidates-kusama:
+    lang: node12
+    handler: ./1kv-candidates/get
+    image: derekc/w3f-1kv-candidates-get:latest
+    environment:
+      CHAIN: kusama
+  w3f-1kv-candidates-polkadot:
+    lang: node12
+    handler: ./1kv-candidates/get
+    image: derekc/w3f-1kv-candidates-get:latest
+    environment:
+      CHAIN: polkadot
+
+  w3f-1kv-candidates-kusama-update:
+    lang: node12
+    handler: ./1kv-candidates/update
+    image: derekc/w3f-1kv-candidates-update:latest
+    environment:
+      CHAIN: kusama
+    annotations:
+      schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  w3f-1kv-candidates-polkadot-update:
+    lang: node12
+    handler: ./1kv-candidates/update
+    image: derekc/w3f-1kv-candidates-update:latest
+    environment:
+      CHAIN: polkadot
+    annotations:
+      schedule: "2 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek

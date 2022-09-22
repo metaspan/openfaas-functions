@@ -1,0 +1,23 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+
+  w3f-1kv-score-kusama:
+    lang: node12
+    handler: ./1kv-score
+    image: derekc/w3f-1kv-score:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-1kv-score-polkadot:
+    lang: node12
+    handler: ./1kv-score
+    image: derekc/w3f-1kv-score:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot

@@ -1,0 +1,45 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+
+  w3f-validators-kusama:
+    lang: node12
+    handler: ./validators/get
+    image: derekc/w3f-validators-get:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-validators-polkadot:
+    lang: node12
+    handler: ./validators/get
+    image: derekc/w3f-validators-get:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot
+
+  w3f-validators-kusama-update:
+    lang: node18-dc
+    handler: ./validators/update
+    image: derekc/w3f-validators-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+    # annotations:
+    #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  w3f-validators-polkadot-update:
+    lang: node18-dc
+    handler: ./validators/update
+    image: derekc/w3f-validators-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot
+    # annotations:
+    #   topic: cron-function
+    #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek

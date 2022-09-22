@@ -1,0 +1,12 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+  mongo-logger:
+    lang: node12
+    handler: ./mongo-logger
+    image: derekc/mongo-logger:latest
+    secrets:
+    - dotenv

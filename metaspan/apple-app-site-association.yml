@@ -1,0 +1,10 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+  apple-app-site-association:
+    lang: node12
+    handler: ./apple-app-site-association
+    image: derekc/apple-app-site-association:latest

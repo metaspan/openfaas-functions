@@ -1,0 +1,37 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+
+  w3f-1kv-nomination-kusama:
+    lang: node12
+    handler: ./1kv-nominations/get
+    image: derekc/w3f-1kv-nomination-get:latest
+    environment:
+      CHAIN: kusama
+  w3f-1kv-nomination-polkadot:
+    lang: node12
+    handler: ./1kv-nominations/get
+    image: derekc/w3f-1kv-nomination-get:latest
+    environment:
+      CHAIN: polkadot
+
+  w3f-1kv-nomination-kusama-update:
+    lang: node12
+    handler: ./1kv-nominations/update
+    image: derekc/w3f-1kv-nomination-update:latest
+    environment:
+      CHAIN: kusama
+    annotations:
+      schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  w3f-1kv-nomination-polkadot-update:
+    lang: node12
+    handler: ./1kv-nominations/update
+    image: derekc/w3f-1kv-nomination-update:latest
+    environment:
+      CHAIN: polkadot
+    annotations:
+      topic: cron-function
+      schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek

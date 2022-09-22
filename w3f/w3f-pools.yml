@@ -1,0 +1,40 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+
+  w3f-pools-kusama:
+    lang: node12
+    handler: ./pools/get
+    image: derekc/w3f-pools-get:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-pools-polkadot:
+    lang: node12
+    handler: ./pools/get
+    image: derekc/w3f-pools-get:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot
+
+  w3f-pools-kusama-update:
+    lang: node18-dc
+    handler: ./pools/update
+    image: derekc/w3f-pools-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-pools-polkadot-update:
+    lang: node18-dc
+    handler: ./pools/update
+    image: derekc/w3f-pools-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot

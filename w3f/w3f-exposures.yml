@@ -1,0 +1,47 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://${GATEWAY_IP}:8080
+
+functions:
+
+  w3f-exposures-kusama:
+    lang: node12
+    handler: ./exposures/get
+    image: derekc/w3f-exposures-get:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-exposures-polkadot:
+    lang: node12
+    handler: ./exposures/get
+    image: derekc/w3f-exposures-get:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot
+
+  w3f-exposures-kusama-update:
+    lang: node18-dc
+    handler: ./exposures/update
+    image: derekc/w3f-exposures-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+      PROVIDER: parity
+    # annotations:
+    #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  w3f-exposures-polkadot-update:
+    lang: node18-dc
+    handler: ./exposures/update
+    image: derekc/w3f-exposures-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot
+      PROVIDER: parity
+    # annotations:
+    #   topic: cron-function
+    #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
