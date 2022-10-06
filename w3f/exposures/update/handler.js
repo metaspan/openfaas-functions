@@ -4,7 +4,8 @@ const moment = require('moment-timezone')
 
 const { ApiPromise, WsProvider } = require('@polkadot/api')
 const { hexToString } = require('@polkadot/util')
-const { endpoints } = require('./endpoints.js')
+// const { endpoints } = require('./endpoints.js')
+var endpoints = {}
 
 const { MongoClient } = require('mongodb')
 
@@ -31,6 +32,11 @@ async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array);
   }
+}
+
+async function getEndpoints () {
+  const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
+  return res.data
 }
 
 async function getAllExposures (api, chain) {
@@ -60,6 +66,8 @@ module.exports = async (event, context) => {
   await logger.debug(`w3f-1kv-exposures-${CHAIN}-update`, event)
   // await logger.debug(FUNCTION, event)
   var result
+
+  endpoints = await getEndpoints()
 
   const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
   const api = await ApiPromise.create({ provider: provider })

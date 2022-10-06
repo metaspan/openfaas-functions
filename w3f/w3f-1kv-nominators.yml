@@ -30,8 +30,8 @@ functions:
     - dotenv
     environment:
       CHAIN: kusama
-    annotations:
-      schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+    # annotations:
+    #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
   w3f-1kv-nominators-polkadot-update:
     lang: node12
     handler: ./1kv-nominators/update
@@ -40,6 +40,6 @@ functions:
     - dotenv
     environment:
       CHAIN: polkadot
-    annotations:
-      topic: cron-function
-      schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+    # annotations:
+    #   topic: cron-function
+    #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek

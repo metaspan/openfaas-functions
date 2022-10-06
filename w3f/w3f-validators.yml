@@ -43,3 +43,38 @@ functions:
     # annotations:
     #   topic: cron-function
     #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+
+
+  w3f-validator-location-stats-kusama:
+    lang: node12
+    handler: ./validator-location-stats/get
+    image: derekc/w3f-validator-location-stats:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-validator-location-stats-polkadot:
+    lang: node12
+    handler: ./validator-location-stats/get
+    image: derekc/w3f-validator-location-stats:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot
+
+  w3f-validator-location-stats-kusama-update:
+    lang: node12
+    handler: ./validator-location-stats/update
+    image: derekc/w3f-validator-location-stats-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: kusama
+  w3f-validator-location-stats-polkadot-update:
+    lang: node12
+    handler: ./validator-location-stats/update
+    image: derekc/w3f-validator-location-stats-update:latest
+    secrets:
+    - dotenv
+    environment:
+      CHAIN: polkadot

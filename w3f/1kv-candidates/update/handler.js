@@ -2,6 +2,7 @@
 const axios = require('axios')
 const moment = require('moment-timezone')
 const { MongoClient } = require('mongodb')
+const { ApiPromise, WsProvider } = require('@polkadot/api')
 
 const { HTTPLogger } = require('./HTTPLogger')
 const logger = new HTTPLogger({hostname: '192.168.1.82'})
@@ -47,9 +48,31 @@ const prepareDB = async function () {
   })
 }
 
+async function getEndpoints () {
+  const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
+  return res.data
+}
+
+async function getStakingValidators(api) {
+  // const keys = await api.query.staking.validators.keys()
+  const keys = await api.query.session.validators()
+  // console.log(keys)
+  // const ids = keys.map(({ args: [stash] }) => stash.toJSON())
+  var ids = keys.map(k => k.toString())
+  // keys.forEach(key => {
+  //   console.log(key.toString())
+  // })
+  console.log(ids)
+  return ids
+}
+
 module.exports = async (event, context) => {
 
   await logger.debug(FUNCTION, event)
+  const endpoints = await getEndpoints()
+  const provider = new WsProvider(endpoints[CHAIN]['local'])
+  const api = await ApiPromise.create({ provider: provider })
+  const active_vals = await getStakingValidators(api)
 
   var res
   var result
@@ -85,6 +108,7 @@ module.exports = async (event, context) => {
         // recalculate 'valid'
         candidate.valid = candidate.validity.filter(f => f.valid === false).length === 0
         candidate.stale = false
+        candidate.active = active_vals.includes(candidate.stash) ? 1 : 0
         candidate.updatedAt = moment().utc().format()
         const result = await col.replaceOne(query, candidate, { upsert: true })
       })

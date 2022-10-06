@@ -10,6 +10,8 @@
   "author": "OpenFaaS Ltd",
   "license": "MIT",
   "dependencies": {
+    "@polkadot/api": "^9.4.3",
+    "@polkadot/util": "^10.1.9",
     "axios": "^0.27.2",
     "moment-timezone": "^0.5.34",
     "mongodb": "^4.8.0"

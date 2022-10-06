@@ -2,7 +2,8 @@
 const axios = require('axios')
 const { ApiPromise, WsProvider } = require('@polkadot/api')
 const { hexToString } = require('@polkadot/util')
-const { endpoints } = require('./endpoints.js')
+// const { endpoints } = require('./endpoints.js')
+var endpoints = {}
 
 const moment = require('moment-timezone')
 const { MongoClient } = require('mongodb')
@@ -28,6 +29,11 @@ const FUNCTION = `w3f-pools-${CHAIN}-update`
 
 function slog(text) {
   console.log(text)
+}
+
+async function getEndpoints () {
+  const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
+  return res.data
 }
 
 // async function getAllCandidates (chain) {
@@ -131,6 +137,8 @@ module.exports = async (event, context) => {
 
   const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
   const api = await ApiPromise.create({ provider: provider })
+
+  endpoints = await getEndpoints()
 
   var res
   var result

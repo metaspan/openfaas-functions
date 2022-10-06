@@ -2,7 +2,8 @@
 const axios = require('axios')
 const { ApiPromise, WsProvider } = require('@polkadot/api')
 const { hexToString } = require('@polkadot/util')
-const { endpoints } = require('./endpoints.js')
+// const { endpoints } = require('./endpoints.js')
+var endpoints = {}
 
 const moment = require('moment-timezone')
 const { MongoClient } = require('mongodb')
@@ -21,12 +22,16 @@ const MONGO_PORT = env.MONGO_PORT
 const MONGO_USERID = env.MONGO_USERID
 const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
-const MONGO_COLLECTION = 'w3f_validator'
+const MONGO_COLLECTION = 'w3f_nominator'
 
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 
 const FUNCTION = `w3f-nominators-${CHAIN}-update`
 
+async function getEndpoints () {
+  const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
+  return res.data
+}
 
 async function getAllNominators (api, batchSize=256) {
   // if (fs.existsSync(`${options.chain}-nominators.json`)) {
@@ -45,7 +50,7 @@ async function getAllNominators (api, batchSize=256) {
   var nominatorsStakings = []
   var idx = 0
   for (const chunk of nominatorAddressesChucked) {
-    console.debug(`${++idx} - the handled chunk size is ${chunk.length}`)
+    console.debug(`${++idx} of ${nominatorAddressesChucked.length} (chunkSize=${chunk.length})`)
     const accounts = await api.derive.staking.accounts(chunk)
     nominatorsStakings.push(...accounts.map(a => {
       return {
@@ -75,17 +80,17 @@ module.exports = async (event, context) => {
 
   var nominators = []
   var result
+  endpoints = await getEndpoints()
 
   try {
-
     const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
     const api = await ApiPromise.create({ provider: provider })
     nominators = await getAllNominators(api, 128)
-
   } catch (err) {
     await logger.error(FUNCTION, err)
   }
 
+  console.log('updating database...')
   const client = new MongoClient(MONGO_CONNECTION_URL)
   try {
     await client.connect()
@@ -114,6 +119,7 @@ module.exports = async (event, context) => {
       'content-type': 'application/json'
     }
   }
+  console.log('done...')
 
   return context
     .status(200)
