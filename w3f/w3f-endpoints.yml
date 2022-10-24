@@ -7,7 +7,7 @@ functions:
 
   w3f-endpoints:
     lang: node12
-    handler: ./endpoints
+    handler: ./w3f-endpoints
     image: derekc/w3f-endpoints:latest
     secrets:
     - dotenv

@@ -2,15 +2,17 @@
 const axios = require('axios')
 const moment = require('moment-timezone')
 
-const { ApiPromise, WsProvider } = require('@polkadot/api')
-const { hexToString } = require('@polkadot/util')
-// const { endpoints } = require('./endpoints.js')
-var endpoints = {}
+// const { ApiPromise, WsProvider } = require('@polkadot/api')
+// const { hexToString } = require('@polkadot/util')
+// // const { endpoints } = require('./endpoints.js')
+// var endpoints = {}
 
 const { MongoClient } = require('mongodb')
 
 const { HTTPLogger } = require('./HTTPLogger')
-const logger = new HTTPLogger({hostname: '192.168.1.82'})
+const LOGGER_HOST = process.env.LOGGER_HOST || 'gateway'
+const LOGGER_PORT = process.env.LOGGER_PORT || 8080
+const logger = new HTTPLogger({hostname: LOGGER_HOST, port: LOGGER_PORT})
 
 const CHAIN = process.env.CHAIN || 'kusama'
 // const UPDATE_URL = `https://${CHAIN}.w3f.community/exposures`
@@ -34,31 +36,36 @@ async function asyncForEach(array, callback) {
   }
 }
 
-async function getEndpoints () {
-  const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
-  return res.data
-}
+// async function getEndpoints () {
+//   const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
+//   return res.data
+// }
 
-async function getAllExposures (api, chain) {
+// async function getAllExposures (api, chain) {
+async function getAllExposures () {
   // Retrieve the active era
-  var activeEra = await api.query.staking.activeEra()
-  activeEra = activeEra.toJSON()
+  // var activeEra = await api.query.staking.activeEra()
+  // activeEra = activeEra.toJSON()
+  var res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/staking/activeEra`)
+  var activeEra = res?.data?.activeEra || 0
   console.log(activeEra)
   // retrieve all exposures for the active era
-  const entries = await api.query.staking.erasStakers.entries(activeEra.index)
-  var list = []
-  asyncForEach(entries, ([key, exposure]) => {
-    // console.log('key arguments:', key.args.map((k) => k.toHuman()))
-    // console.log('     exposure:', exposure.toHuman())
-    var exp = exposure.toJSON()
-    var [era, stash] = key.args.map((k) => k.toHuman())
-    exp.era = parseInt(era.replace(',',''))
-    exp.total = parseInt(exp.total, 16)
-    exp.stash = stash
-    exp.chain = chain
-    list.push(exp)
-  })
-  return list
+  // const entries = await api.query.staking.erasStakers.entries(activeEra.index)
+  // var list = []
+  // asyncForEach(entries, ([key, exposure]) => {
+  //   // console.log('key arguments:', key.args.map((k) => k.toHuman()))
+  //   // console.log('     exposure:', exposure.toHuman())
+  //   var exp = exposure.toJSON()
+  //   var [era, stash] = key.args.map((k) => k.toHuman())
+  //   exp.era = parseInt(era.replace(',',''))
+  //   exp.total = parseInt(exp.total, 16)
+  //   exp.stash = stash
+  //   exp.chain = chain
+  //   list.push(exp)
+  // })
+  res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/staking/erasStakers?index=${activeEra.index}`)
+  // return list
+  return res?.data?.activeEra || []
 }
 
 module.exports = async (event, context) => {
@@ -67,12 +74,13 @@ module.exports = async (event, context) => {
   // await logger.debug(FUNCTION, event)
   var result
 
-  endpoints = await getEndpoints()
+  // endpoints = await getEndpoints()
 
-  const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
-  const api = await ApiPromise.create({ provider: provider })
+  // const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
+  // const api = await ApiPromise.create({ provider: provider })
 
-  const exposures = await getAllExposures(api, CHAIN)
+  // const exposures = await getAllExposures(api, CHAIN)
+  const exposures = await getAllExposures()
 
   // update the db
   const client = new MongoClient(MONGO_CONNECTION_URL)

@@ -5,7 +5,8 @@ const endpoints = {
     onFinality: 'wss://polkadot.api.onfinality.io/public-ws',
     dwellir: 'wss://polkadot-rpc.dwellir.com',
     // local: 'ws://192.168.1.92:30225',
-    local: 'ws://192.168.0.85:30225',
+    pinknode: 'wss://public-rpc.pinknode.io/polkadot',
+    local: 'ws://192.168.1.92:30325'
   },
   kusama: {
     // local: 'wss://192.168.1.85:30225',
@@ -13,7 +14,8 @@ const endpoints = {
     onFinality: 'wss://kusama.api.onfinality.io/public-ws',
     parity: 'wss://kusama-rpc.polkadot.io',
     dwellir: 'wss://kusama-rpc.dwellir.com',
-    local: 'ws://192.168.0.85:40225'
+    pinknode: 'wss://public-rpc.pinknode.io/kusama',
+    local: 'ws://192.168.1.92:40425'
   }
 }
 

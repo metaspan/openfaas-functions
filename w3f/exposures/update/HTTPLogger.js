@@ -4,7 +4,7 @@ const moment = require('moment-timezone')
 
 const DEFAULTS = {
   protocol: 'http',
-  hostname: 'localhost',
+  hostname: 'gateway',
   port: '8080',
   service: '/function/mongo-logger'
 }

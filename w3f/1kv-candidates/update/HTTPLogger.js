@@ -29,8 +29,12 @@ class HTTPLogger {
     // }
     const url = `${this.base_url}/${fn}?level=${level}`
     console.log('url:', url)
-    const res = await axios.post(url, event)
-    return res.data
+    try {
+      const res = await axios.post(url, event)
+      return res.data
+    } catch (err) {
+      return { error: true }
+    }
   }
 
   async debug (fn, event) { return this.log(fn, event, 'debug') }

@@ -4,7 +4,10 @@ const moment = require('moment-timezone')
 const { MongoClient } = require('mongodb')
 const { HTTPLogger } = require('./HTTPLogger')
 
-const logger = new HTTPLogger({hostname: '192.168.1.82'})
+const LOGGER_HOST = process.env.LOGGER_HOST || 'gateway'
+const LOGGER_PORT = process.env.LOGGER_PORT || 8080
+const logger = new HTTPLogger({hostname: LOGGER_HOST, port: LOGGER_PORT})
+
 const fs = require('fs')
 const env = JSON.parse(fs.readFileSync('/var/openfaas/secrets/dotenv', 'utf-8'))
 

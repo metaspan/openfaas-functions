@@ -1,18 +1,21 @@
 'use strict'
 const axios = require('axios')
-const { ApiPromise, WsProvider } = require('@polkadot/api')
-const { hexToString } = require('@polkadot/util')
-// const { endpoints } = require('./endpoints.js')
-var endpoints = {}
+// const { ApiPromise, WsProvider } = require('@polkadot/api')
+// const { hexToString } = require('@polkadot/util')
+// // const { endpoints } = require('./endpoints.js')
+// var endpoints = {}
 
 const moment = require('moment-timezone')
 const { MongoClient } = require('mongodb')
 const { HTTPLogger } = require('./HTTPLogger')
 
-const logger = new HTTPLogger({hostname: '192.168.1.82'})
+const LOGGER_HOST = process.env.LOGGER_HOST || 'gateway' // '192.168.1.91' // 'localhost'
+const LOGGER_PORT = process.env.LOGGER_PORT || 8080
+const logger = new HTTPLogger({hostname: LOGGER_HOST, port: LOGGER_PORT})
 
 const CHAIN = process.env.CHAIN || 'kusama'
 const PROVIDER = process.env.PROVIDER || 'local'
+const REST_API_BASE = process.env.REST_API_BASE || 'http://192.168.1.92:3000'
 
 const fs = require('fs')
 const env = JSON.parse(fs.readFileSync('/var/openfaas/secrets/dotenv', 'utf-8'))
@@ -31,10 +34,11 @@ function slog(text) {
   console.log(text)
 }
 
-async function getEndpoints () {
-  const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
-  return res.data
-}
+// async function getEndpoints () {
+//   const res = await axios.get('http://api.metaspan.io/function/w3f-endpoints')
+//   console.log('getEndpoints()', JSON.stringify(res.data))
+//   return res.data
+// }
 
 // async function getAllCandidates (chain) {
 //   try {
@@ -56,29 +60,34 @@ async function getEndpoints () {
 //     return []
 //   }
 // }
-
-async function getAllPools (api) {
+// async function getAllPools (api) {
+async function getAllPools () {
   slog(`getAllPools(): ${CHAIN}`)
   var ret = []
-  var entries = await api.query.nominationPools.poolMembers.entries()
-  // console.log('num entries', entries.length)
-  var poolMembers = entries.reduce((all, [{ args: [accountId] }, optMember]) => {
-    if (optMember.isSome) {
-      const member = optMember.unwrap()
-      const poolId = parseInt(member.poolId.toString())
-      if (!all[poolId]) {
-        all[poolId] = []
-      }
-      // all[poolId].push({
-      //   accountId: accountId.toString(),
-      //   member
-      // });
-      all[poolId].push(accountId.toString())
-    }
-    return all
-  }, {})
+  // // var entries = await api.query.nominationPools.poolMembers.entries()
+  // var res = await axios.get('${REST_API_BASE}/${CHAIN}/query/nominationPools/poolMembers')
+  // // var entries = res.data || []
+  // // // console.log('num entries', entries.length)
+  // // var poolMembers = entries.reduce((all, [{ args: [accountId] }, optMember]) => {
+  // //   if (optMember.isSome) {
+  // //     const member = optMember.unwrap()
+  // //     const poolId = parseInt(member.poolId.toString())
+  // //     if (!all[poolId]) {
+  // //       all[poolId] = []
+  // //     }
+  // //     // all[poolId].push({
+  // //     //   accountId: accountId.toString(),
+  // //     //   member
+  // //     // });
+  // //     all[poolId].push(accountId.toString())
+  // //   }
+  // //   return all
+  // // }, {})
+  // var poolMembers = res?.data?.poolMembers || []
 
-  var lastId = await api.query.nominationPools.lastPoolId()
+  // var lastId = await api.query.nominationPools.lastPoolId()
+  var res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/lastPoolId`)
+  var lastId = res?.data?.lastPoolId || 0
   for (var pid = 1; pid <= lastId; pid++) {
     slog(`pool ${pid} =====================`)
     var pool = { id: pid }
@@ -94,8 +103,10 @@ async function getAllPools (api) {
     //     "stateToggler":"Ghekn7fgaxi7GX7ty547qt81vo6m3V735dCF5WgJ3ZE5vfb"
     //   }
     // }
-    var bondedPools = await api.query.nominationPools.bondedPools(pid)
-    bondedPools = bondedPools.toJSON()
+    // var bondedPools = await api.query.nominationPools.bondedPools(pid)
+    // bondedPools = bondedPools.toJSON()
+    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/bondedPools?id=${pid}`)
+    var bondedPools = res?.data?.bondedPools || {}
     pool.points = bondedPools?.points || 0
     pool.state = bondedPools?.state || 'Destroyed'
     pool.memberCounter = bondedPools?.memberCounter || 0
@@ -103,23 +114,29 @@ async function getAllPools (api) {
     // console.log(pool.bondedPools)
 
     // pool name is in the meta
-    pool.name = await api.query.nominationPools.metadata(pid)
-    pool.name = hexToString(pool.name.toString())
+    // pool.name = await api.query.nominationPools.metadata(pid)
+    // pool.name = hexToString(pool.name.toString())
+    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/metadata?id=${pid}`)
+    pool.name = res?.data?.metadata || ''
     // console.log(pool.name)
 
     // {balance: 0, totalEarnings: 0, points: 0}
-    var rewardPools = await api.query.nominationPools.rewardPools(pid)
-    rewardPools = rewardPools.toJSON()
+    // var rewardPools = await api.query.nominationPools.rewardPools(pid)
+    // rewardPools = rewardPools.toJSON()
+    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/metadata?id=${pid}`)
+    var rewardPools = res?.data?.rewardPools || {}
     pool.balance = rewardPools?.balance || 0
     pool.totalEarnings = rewardPools?.totalEarnings || 0
     // pool.points = rewardPools.points
     // console.log(pool.rewardPools)
 
-    pool.members = poolMembers[pool.id]
+    pool.members = members[pool.id]
     // console.log(pool.members)
 
-    pool.subPoolStorage = await api.query.nominationPools.subPoolsStorage(pid)
-    pool.subPoolStorage = pool.subPoolStorage.toJSON()
+    // pool.subPoolStorage = await api.query.nominationPools.subPoolsStorage(pid)
+    // pool.subPoolStorage = pool.subPoolStorage.toJSON()
+    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/subPoolsStorage?id=${pid}`)
+    pool.subPoolsStorage = res?.data?.subPoolsStorage || {}
 
     ret.push(pool)
   }
@@ -135,10 +152,9 @@ module.exports = async (event, context) => {
 
   await logger.debug(FUNCTION, event)
 
-  const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
-  const api = await ApiPromise.create({ provider: provider })
-
-  endpoints = await getEndpoints()
+  // endpoints = await getEndpoints()
+  // const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
+  // const api = await ApiPromise.create({ provider: provider })
 
   var res
   var result
@@ -149,24 +165,27 @@ module.exports = async (event, context) => {
     // candidates = await getAllCandidates(CHAIN)
     // slog(`... found ${candidates.length}`)
     slog('getting members')
-    var entries = await api.query.nominationPools.poolMembers.entries()
-    // console.log('num entries', entries.length)
-    members = entries.reduce((all, [{ args: [accountId] }, optMember]) => {
-      if (optMember.isSome) {
-        const member = optMember.unwrap();
-        const poolId = member.poolId.toNumber() // toString();
-        if (!all[poolId]) { all[poolId] = []; }
-        all[poolId].push({
-          accountId: accountId.toString(),
-          points: member.points.toNumber()
-          // member
-        });
-        // all[poolId].push(accountId.toString());
-      }
-      return all;
-    }, {})
+    // var entries = await api.query.nominationPools.poolMembers.entries()
+    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/poolMembers`)
+    members = res?.data?.poolMembers || {}
+    // // console.log('num entries', entries.length)
+    // members = entries.reduce((all, [{ args: [accountId] }, optMember]) => {
+    //   if (optMember.isSome) {
+    //     const member = optMember.unwrap();
+    //     const poolId = member.poolId.toNumber() // toString();
+    //     if (!all[poolId]) { all[poolId] = []; }
+    //     all[poolId].push({
+    //       accountId: accountId.toString(),
+    //       points: member.points.toNumber()
+    //       // member
+    //     });
+    //     // all[poolId].push(accountId.toString());
+    //   }
+    //   return all;
+    // }, {})
     slog('getting pools')
-    pools = await getAllPools(api)
+    // pools = await getAllPools(api)
+    pools = await getAllPools()
     slog(`... found ${pools.length}`)
   } catch (err) {
     console.warn(`ERROR: ${FUNCTION}`)
@@ -208,7 +227,7 @@ module.exports = async (event, context) => {
     }
   } finally {
     try { await client.close() } catch {}
-    try { await api.disconnect() } catch {}
+    // try { await api.disconnect() } catch {}
   }
 
   return context

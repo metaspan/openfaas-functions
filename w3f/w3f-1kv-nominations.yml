@@ -9,12 +9,16 @@ functions:
     lang: node12
     handler: ./1kv-nominations/get
     image: derekc/w3f-1kv-nomination-get:latest
+    secrets:
+    - dotenv
     environment:
       CHAIN: kusama
   w3f-1kv-nomination-polkadot:
     lang: node12
     handler: ./1kv-nominations/get
     image: derekc/w3f-1kv-nomination-get:latest
+    secrets:
+    - dotenv
     environment:
       CHAIN: polkadot
 
@@ -22,16 +26,20 @@ functions:
     lang: node12
     handler: ./1kv-nominations/update
     image: derekc/w3f-1kv-nomination-update:latest
+    secrets:
+    - dotenv
     environment:
       CHAIN: kusama
-    annotations:
-      schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+    # annotations:
+    #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
   w3f-1kv-nomination-polkadot-update:
     lang: node12
     handler: ./1kv-nominations/update
     image: derekc/w3f-1kv-nomination-update:latest
+    secrets:
+    - dotenv
     environment:
       CHAIN: polkadot
-    annotations:
-      topic: cron-function
-      schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+    # annotations:
+    #   topic: cron-function
+    #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek

@@ -2,9 +2,10 @@
 const axios = require('axios')
 const moment = require('moment-timezone')
 
+// http://192.168.1.91:8080/function/mongo-logger
 const DEFAULTS = {
   protocol: 'http',
-  hostname: 'localhost',
+  hostname: 'gateway',
   port: '8080',
   service: '/function/mongo-logger'
 }
@@ -27,10 +28,15 @@ class HTTPLogger {
     //   function: fn,
     //   event
     // }
-    const url = `${this.base_url}/${fn}?level=${level}`
+    const url = `${this.base_url}?function=${fn}&level=${level}`
     console.log('url:', url)
-    const res = await axios.post(url, event)
-    return res.data
+    try {
+      const res = await axios.post(url, event)
+      return res.data
+    } catch (err) {
+      console.log(err)
+      return {error: true}
+    }
   }
 
   async debug (fn, event) { return this.log(fn, event, 'debug') }
