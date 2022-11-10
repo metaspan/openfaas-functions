@@ -54,7 +54,15 @@ function calculateScore (score) {
   delete score.randomness
   Object.keys(score).forEach((key) => {
     // console.log('checking ' + key)
-    if (!['_id','updated','address','__v','total','aggregate','randomness'].includes(key)) {
+    if (!['_id',
+      'updated',
+      'address',
+      '__v',
+      'total',
+      'aggregate',
+      'randomness',
+      'session'
+    ].includes(key)) {
       total += score[key]
       items.push(`${PREFIX}_score{category="${key}", stash="${score.address}"} ${score[key]}`)
     }
@@ -82,8 +90,11 @@ module.exports = async (event, context) => {
 
   await prepareDB()
 
+  const latest = await dbc.collection('1kv_nomination').find({ chain: CHAIN }).sort({ era: -1 }).limit(1).toArray()
+  // TODO get the current era from REST
   const projection = { chain: 0 } // exclude chain field from result
-  const nominators_1kv = await dbc.collection('1kv_nominator').find({chain: CHAIN, 'current.stash': stash}, {projection}).toArray()
+  // const nominators_1kv = await dbc.collection('1kv_nominator').find({chain: CHAIN, 'current.stash': stash}, {projection}).toArray()
+  const nomination_1kv = await dbc.collection('1kv_nomination').find({ chain: CHAIN, validators: stash }).toArray()
   const nominators = await dbc.collection('w3f_nominator').find({chain: CHAIN, targets: stash}, {projection}).toArray()
   // console.log('nominators_1kv', nominators_1kv)
   var candidate = await dbc.collection('1kv_candidate').findOne({chain: CHAIN, stash: stash})
@@ -97,22 +108,23 @@ module.exports = async (event, context) => {
   }
 
   const checkNominated = () => {
-    // specifically, 1kv nominators
-    // get all nominations
-    var nominated = []
-    nominators_1kv.forEach((nominator) => {
-      nominator.current.forEach(current => {
-        nominated.push(current.stash)
-      })
-    })
-    nominated = [...new Set(nominated)].sort()
-    // this.candidates.forEach( async(candidate, cidx) => {
-    candidate.nominated_1kv = false
-    //   // this.candidates[cidx].nominators = []
-    if (nominated.includes(candidate.stash)) {
-      candidate.nominated_1kv = true
-    }
+    // // specifically, 1kv nominators
+    // // get all nominations
+    // var nominated = []
+    // nominators_1kv.forEach((nominator) => {
+    //   nominator.current.forEach(current => {
+    //     nominated.push(current.stash)
+    //   })
     // })
+    // nominated = [...new Set(nominated)].sort()
+    // // this.candidates.forEach( async(candidate, cidx) => {
+    // candidate.nominated_1kv = false
+    // //   // this.candidates[cidx].nominators = []
+    // if (nominated.includes(candidate.stash)) {
+    //   candidate.nominated_1kv = true
+    // }
+    // // })
+    candidate.nominated_1kv = nomination_1kv > 0
     // console.debug('nominated:', nominated)
   }
 

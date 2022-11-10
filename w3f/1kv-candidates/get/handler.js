@@ -43,11 +43,22 @@ module.exports = async (event, context) => {
     await prepareDB()
     const col = dbc.collection(MONGO_COLLECTION)
     const projection = { chain: 0 } // exclude chain field from result
+    const latest = await dbc.collection('1kv_nomination').find({ chain: CHAIN }).sort({ era: -1 }).limit(1).toArray()
+    console.log('latest', latest)
     if (event.path === '/') {
       result = await col.find({chain: CHAIN}, projection).toArray()
+      for (var i = 0; i < result.length; i++) {
+        const crit = { chain: CHAIN, era: latest[0].era, validators: result[i].stash }
+        const noms = await dbc.collection('1kv_nomination').count(crit)
+        result[i].nominated_1kv = noms > 0  
+      }
     } else {
       const stash = event.path.replace('/', '')
       result = await col.findOne({ chain: CHAIN, stash: stash }, projection)
+      // const ids = result.map(r => r.stash)
+      const crit = { chain: CHAIN, era: latest[0].era, validators: stash }
+      const noms = await dbc.collection('1kv_nomination').count(crit)
+      result.nominated_1kv = noms > 0
     }
   } catch (err) {
     console.error(err)
