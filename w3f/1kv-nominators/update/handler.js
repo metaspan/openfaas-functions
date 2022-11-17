@@ -26,8 +26,9 @@ const FUNCTION = `w3f-1kv-nominators-${CHAIN}-update`
 module.exports = async (event, context) => {
 
   await logger.debug(FUNCTION, event)
+  var res = await axios.get(`http://192.168.1.2:1880/job-log?host=gateway&name=function:${FUNCTION}&action=start`)
+  const { id } = res.data
 
-  var res
   var result
 
   try {
@@ -77,6 +78,8 @@ module.exports = async (event, context) => {
       'content-type': 'application/json'
     }
   }
+
+  await axios.get(`http://192.168.1.2:1880/job-log?id=${id}&action=stop`)
 
   return context
     .status(200)

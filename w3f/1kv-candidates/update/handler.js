@@ -78,6 +78,10 @@ module.exports = async (event, context) => {
   // console.log(JSON.stringify(context))
   // console.log(JSON.stringify(event))
   await logger.debug(FUNCTION, event)
+  // var res = await axios.get(`http://gateway:8080/function/job-log-update?host=gateway&name=function:${FUNCTION}&action=start`)
+  var res = await axios.get(`http://192.168.1.2:1880/job-log?host=gateway&name=function:${FUNCTION}&action=start`)
+  const { id } = res.data
+
   // const endpoints = await getEndpoints()
   // const provider = new WsProvider(endpoints[CHAIN]['local'])
   // const api = await ApiPromise.create({ provider: provider })
@@ -159,6 +163,9 @@ module.exports = async (event, context) => {
     }
   }
   slog('done...')
+
+  // await axios.get(`http://gateway:8080/function/job-log-update?id=${id}&action=stop`)
+  await axios.get(`http://192.168.1.2:1880/job-log?id=${id}&action=stop`)
 
   return context
     .status(200)

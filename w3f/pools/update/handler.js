@@ -151,12 +151,13 @@ var members = [];
 module.exports = async (event, context) => {
 
   await logger.debug(FUNCTION, event)
+  var res = await axios.get(`http://gateway:8080/function/job-log-update?host=gateway&name=function:${FUNCTION}&action=start`)
+  const { id } = res.data
 
   // endpoints = await getEndpoints()
   // const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
   // const api = await ApiPromise.create({ provider: provider })
 
-  var res
   var result
 
   try {
@@ -229,6 +230,8 @@ module.exports = async (event, context) => {
     try { await client.close() } catch {}
     // try { await api.disconnect() } catch {}
   }
+
+  await axios.get(`http://gateway:8080/function/job-log-update?id=${id}&action=stop`)
 
   return context
     .status(200)

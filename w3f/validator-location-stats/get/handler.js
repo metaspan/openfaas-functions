@@ -3,11 +3,14 @@ const { MongoClient } = require('mongodb')
 
 const CHAIN = process.env.CHAIN || 'kusama'
 
-const MONGO_HOST = '192.168.1.2'
-const MONGO_PORT = '32768'
-const MONGO_USERID = 'mspn_io_api'
-const MONGO_PASSWD = 'wordpass'
-const MONGO_DATABASE = 'mspn_io_api'
+const fs = require('fs')
+const env = JSON.parse(fs.readFileSync('/var/openfaas/secrets/dotenv', 'utf-8'))
+
+const MONGO_HOST = env.MONGO_HOST
+const MONGO_PORT = env.MONGO_PORT
+const MONGO_USERID = env.MONGO_USERID
+const MONGO_PASSWD = env.MONGO_PASSWD
+const MONGO_DATABASE = env.MONGO_DATABASE
 const MONGO_COLLECTION = 'w3f_location_stats'
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 
@@ -36,6 +39,7 @@ module.exports = async (event, context) => {
 
   // const client = new MongoClient(MONGO_CONNECTION_URL)
   var result = {}
+  console.log('locationStats', event)
 
   try {
     // await client.connect()
@@ -44,7 +48,9 @@ module.exports = async (event, context) => {
     const col = dbc.collection(MONGO_COLLECTION)
     const projection = { chain: 0 } // exclude chain field from result
     if (event.path === '/') {
-      result = await col.find({chain: CHAIN}, projection).toArray()
+      var crit = { chain: CHAIN }
+      if (event.query.name) crit.name = event.query.name
+      result = await col.find(crit, projection).toArray()
     } else {
       const _id = event.path.replace('/', '')
       result = await col.findOne({ chain: CHAIN, _id: _id }, projection)

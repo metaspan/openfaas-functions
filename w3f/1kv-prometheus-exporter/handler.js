@@ -94,8 +94,9 @@ module.exports = async (event, context) => {
   // TODO get the current era from REST
   const projection = { chain: 0 } // exclude chain field from result
   // const nominators_1kv = await dbc.collection('1kv_nominator').find({chain: CHAIN, 'current.stash': stash}, {projection}).toArray()
-  const nomination_1kv = await dbc.collection('1kv_nomination').find({ chain: CHAIN, validators: stash }).toArray()
-  const nominators = await dbc.collection('w3f_nominator').find({chain: CHAIN, targets: stash}, {projection}).toArray()
+  // const nomination_1kv = await dbc.collection('1kv_nomination').find({ chain: CHAIN, validators: stash }).toArray()
+  const nominator_1kv = await dbc.collection('1kv_nominator').find({ chain: CHAIN, 'current.stash': stash }).toArray()
+  const nominators = await dbc.collection('w3f_nominator').find({chain: CHAIN, nominators: stash}, {projection}).toArray()
   // console.log('nominators_1kv', nominators_1kv)
   var candidate = await dbc.collection('1kv_candidate').findOne({chain: CHAIN, stash: stash})
   // console.log('candidate:', candidate)
@@ -124,7 +125,8 @@ module.exports = async (event, context) => {
     //   candidate.nominated_1kv = true
     // }
     // // })
-    candidate.nominated_1kv = nomination_1kv > 0
+    // candidate.nominated_1kv = nomination_1kv.length > 0
+    candidate.nominated_1kv = nominator_1kv.length > 0
     // console.debug('nominated:', nominated)
   }
 

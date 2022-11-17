@@ -23,7 +23,8 @@ functions:
       CHAIN: polkadot
 
   w3f-exposures-kusama-update:
-    lang: node18-dc
+    # lang: node18-dc # we don't need @polkadot, but we have ?. syntax
+    lang: node16
     handler: ./exposures/update
     image: derekc/w3f-exposures-update:latest
     secrets:
@@ -34,7 +35,8 @@ functions:
     # annotations:
     #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
   w3f-exposures-polkadot-update:
-    lang: node18-dc
+    # lang: node18-dc # we don't need @polkadot, but we have ?. syntax
+    lang: node16
     handler: ./exposures/update
     image: derekc/w3f-exposures-update:latest
     secrets:

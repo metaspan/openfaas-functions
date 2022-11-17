@@ -70,7 +70,10 @@ async function getAllExposures () {
 
 module.exports = async (event, context) => {
 
-  await logger.debug(`w3f-1kv-exposures-${CHAIN}-update`, event)
+  const FUNCTION = `w3f-1kv-exposures-${CHAIN}-update`
+  await logger.debug(FUNCTION, event)
+  var res = await axios.get(`http://192.168.1.2:1880/job-log?host=gateway&name=function:${FUNCTION}&action=start`)
+  const { id } = res.data
   // await logger.debug(FUNCTION, event)
   var result
 
@@ -113,6 +116,8 @@ module.exports = async (event, context) => {
       'content-type': 'application/json'
     }
   }
+
+  await axios.get(`http://192.168.1.2:1880/job-log?id=${id}&action=stop`)
 
   return context
     .status(200)

@@ -6,11 +6,15 @@ const { MongoClient } = require('mongodb')
 const CHAIN = process.env.CHAIN || 'kusama'
 const UPDATE_URL = `https://${CHAIN}.w3f.community/locationstats`
 
-const MONGO_HOST = '192.168.1.2'
-const MONGO_PORT = '32768'
-const MONGO_USERID = 'mspn_io_api'
-const MONGO_PASSWD = 'wordpass'
-const MONGO_DATABASE = 'mspn_io_api'
+const fs = require('fs')
+const env = JSON.parse(fs.readFileSync('/var/openfaas/secrets/dotenv', 'utf-8'))
+
+const MONGO_HOST = env.MONGO_HOST
+const MONGO_PORT = env.MONGO_PORT
+const MONGO_USERID = env.MONGO_USERID
+const MONGO_PASSWD = env.MONGO_PASSWD
+const MONGO_DATABASE = env.MONGO_DATABASE
+const MONGO_COLLECTION = 'w3f_location_stats'
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 
 module.exports = async (event, context) => {
@@ -24,8 +28,8 @@ module.exports = async (event, context) => {
     const client = new MongoClient(MONGO_CONNECTION_URL)
     try {
       await client.connect()
-      const database = client.db("mspn_io_api")
-      const col = database.collection("w3f_location_stats")
+      const database = client.db(MONGO_DATABASE)
+      const col = database.collection(MONGO_COLLECTION)
       locations.forEach(async (location) => {
         const query = {
           _id: location._id,

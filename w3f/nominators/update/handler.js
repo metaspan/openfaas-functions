@@ -31,11 +31,11 @@ const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_
 
 const FUNCTION = `w3f-nominators-${CHAIN}-update`
 
-async function getEndpoints () {
-  // const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
-  const res = await axios.get('http://gateway:8080/function/w3f-endpoints')
-  return res.data
-}
+// async function getEndpoints () {
+//   // const res = await axios.get('https://api.metaspan.io/function/w3f-endpoints')
+//   const res = await axios.get('http://gateway:8080/function/w3f-endpoints')
+//   return res.data
+// }
 
 async function getAllNominators (batchSize=256) {
   // if (fs.existsSync(`${options.chain}-nominators.json`)) {
@@ -86,14 +86,16 @@ async function getAllNominators (batchSize=256) {
 module.exports = async (event, context) => {
 
   await logger.debug(FUNCTION, event)
+  var res = await axios.get(`http://192.168.1.2:1880/job-log?host=gateway&name=function:${FUNCTION}&action=start`)
+  const { id } = res.data
 
   var nominators = []
   var result
-  endpoints = await getEndpoints()
+  // var endpoints = await getEndpoints()
 
   try {
-    const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
-    const api = await ApiPromise.create({ provider: provider })
+    // const provider = new WsProvider(endpoints[CHAIN][PROVIDER])
+    // const api = await ApiPromise.create({ provider: provider })
     nominators = await getAllNominators(128)
   } catch (err) {
     await logger.error(FUNCTION, err)
@@ -129,6 +131,7 @@ module.exports = async (event, context) => {
     }
   }
   console.log('done...')
+  await axios.get(`http://192.168.1.2:1880/job-log?id=${id}&action=stop`)
 
   return context
     .status(200)

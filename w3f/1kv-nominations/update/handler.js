@@ -25,8 +25,12 @@ const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_
 module.exports = async (event, context) => {
 
   await logger.debug(`w3f-1kv-nominations-${CHAIN}-update`, event)
+  const FUNCTION = `w3f-1kv-nominations-${CHAIN}-update`
+  // var res = await axios.get(`http://gateway:8080/function/job-log-update?host=gateway&name=function:${FUNCTION}&action=start`)
+  var res = await axios.get(`http://192.168.1.2:1880/job-log?host=gateway&name=function:${FUNCTION}&action=start`)
+  const { id } = res.data
 
-  const res = await axios.get(UPDATE_URL)
+  res = await axios.get(UPDATE_URL)
   var result
 
   if (res.data) {
@@ -37,6 +41,8 @@ module.exports = async (event, context) => {
       await client.connect()
       const database = client.db(MONGO_DATABASE)
       const col = database.collection(MONGO_COLLECTION)
+      // TODO: do we need to track changes over time?
+      // await col.deleteMany({ chain: CHAIN })
       nominations.forEach(async (nomination) => {
         const query = {
           _id: nomination._id,
@@ -70,6 +76,9 @@ module.exports = async (event, context) => {
       'content-type': 'application/json'
     }
   }
+
+  // await axios.get(`http://gateway:8080/function/job-log-update?id=${id}&action=stop`)
+  await axios.get(`http://192.168.1.2:1880/job-log?id=${id}&action=stop`)
 
   return context
     .status(200)
