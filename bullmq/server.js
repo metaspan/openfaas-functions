@@ -40,7 +40,7 @@ const jobs = [
   'w3f_nominators',
   'w3f_pools',
   'w3f_validator_location_stats',
-  'w3f_validator'
+  'w3f_validators'
 ]
 
 const q_1kv_candidates_update = new Queue('1kv_candidates_update', qOpts)
