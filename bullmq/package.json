@@ -1,0 +1,20 @@
+{
+  "name": "metaspan-bullmq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@bull-board/express": "^4.9.0",
+    "axios": "^1.2.1",
+    "bullmq": "^3.5.1",
+    "dotenv": "^16.0.3",
+    "moment": "^2.29.4",
+    "mongodb": "^4.13.0"
+  }
+}
