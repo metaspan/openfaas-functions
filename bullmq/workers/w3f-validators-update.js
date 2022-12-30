@@ -67,9 +67,9 @@ export async function f_w3f_validators_update (job) {
       validators: validators.map(n => { return { _id: n._id, stash: n.stash } })
     }
   } catch (err) {
-    console.warn(`ERROR: ${FUNCTION}`)
+    console.warn(`ERROR: w3f-validtors-update`)
     console.warn(err)
-    await logger.error(FUNCTION, err)
+    job.log(err)
     result = {
       error: err,
     }
