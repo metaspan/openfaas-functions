@@ -44,8 +44,13 @@ const jobs = [
   'w3f_validators'
 ]
 
-async function onError (err) {
-  const errStr = typeof err === 'string' ? err : err.toString()
+async function onError (job, err) {
+  const errStr = `ERROR: ${job}: ` + typeof err === 'string' ? err : err.toString()
+  await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
+}
+
+async function onFailed (job, event) {
+  const errStr = `FAILED: ${job}: ` + typeof event === 'string' ? event : event.toString()
   await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
 }
 
@@ -59,21 +64,20 @@ const q_w3f_validator_location_stats_update = new Queue('w3f_validator_location_
 const q_w3f_validators_update = new Queue('w3f_validators_update', qOpts)
 
 const w_1kv_candidates_update = new Worker('1kv_candidates_update', f_1kv_candidates_update, qOpts)
-w_1kv_candidates_update.on('error', onError)
 const w_1kv_nominations_update = new Worker('1kv_nominations_update', f_1kv_nominations_update, qOpts)
-w_1kv_nominations_update.on('error', onError)
 const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
-w_1kv_nominators_update.on('error', onError)
 const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
-w_w3f_exposures_update.on('error', onError)
 const w_w3f_nominators_update = new Worker('w3f_nominators_update', f_w3f_nominators_update, qOpts)
-w_w3f_nominators_update.on('error', onError)
 const w_w3f_pools_update = new Worker('w3f_pools_update', f_w3f_pools_update, qOpts)
-w_w3f_pools_update.on('error', onError)
 const w_w3f_validator_location_stats_update = new Worker('w3f_validator_location_stats_update', f_w3f_validator_location_stats_update, qOpts)
-w_w3f_validator_location_stats_update.on('error', onError)
 const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
-w_w3f_validators_update.on('error', onError)
+
+// handle all error/failed
+jobs.forEach(job => {
+  const worker = eval(`w_${job}_update`)
+  worker.on('error', (err) => onError(job, err))
+  worker.on('failed', (event) => onFailed(job, event))
+})
 
 const jobRetention = {
   removeOnComplete: {
