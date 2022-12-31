@@ -45,12 +45,12 @@ const jobs = [
 ]
 
 async function onError (job, err) {
-  const errStr = `ERROR: ${job}: ` + typeof err === 'string' ? err : err.toString()
+  const errStr = `ERROR: ${job}: ` + typeof err === 'string' ? err : JSON.stringify(err)
   await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
 }
 
 async function onFailed (job, event) {
-  const errStr = `FAILED: ${job}: ` + typeof event === 'string' ? event : event.toString()
+  const errStr = `FAILED: ${job}: ` + typeof event === 'string' ? event : JSON.stringify(event)
   await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
 }
 
