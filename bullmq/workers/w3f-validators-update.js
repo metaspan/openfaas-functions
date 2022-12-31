@@ -43,9 +43,7 @@ export async function f_w3f_validators_update (job) {
     slog('getting validators')
     validators = await getAllValidators(CHAIN, validator_nominators, 128)
   } catch (err) {
-    console.warn(`ERROR: ${FUNCTION}`)
     console.warn(err)
-    // await logger.error(FUNCTION, err)
     job.log(err)
   }
 
