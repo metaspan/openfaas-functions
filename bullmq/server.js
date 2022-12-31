@@ -14,6 +14,7 @@ import { f_w3f_nominators_update } from './workers/w3f-nominators-update.js'
 import { f_w3f_pools_update } from './workers/w3f-pools-update.js'
 import { f_w3f_validator_location_stats_update } from './workers/w3f-validator-location-stats-update.js'
 import { f_w3f_validators_update } from './workers/w3f-validators-update.js'
+import axios from 'axios'
 
 const env = process.env
 const chains = ['kusama', 'polkadot']
@@ -43,6 +44,11 @@ const jobs = [
   'w3f_validators'
 ]
 
+async function onError (err) {
+  const errStr = typeof err === 'string' ? err : err.toString()
+  await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
+}
+
 const q_1kv_candidates_update = new Queue('1kv_candidates_update', qOpts)
 const q_1kv_nominations_update = new Queue('1kv_nominations_update', qOpts)
 const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
@@ -53,13 +59,21 @@ const q_w3f_validator_location_stats_update = new Queue('w3f_validator_location_
 const q_w3f_validators_update = new Queue('w3f_validators_update', qOpts)
 
 const w_1kv_candidates_update = new Worker('1kv_candidates_update', f_1kv_candidates_update, qOpts)
+w_1kv_candidates_update.on('error', onError)
 const w_1kv_nominations_update = new Worker('1kv_nominations_update', f_1kv_nominations_update, qOpts)
+w_1kv_nominations_update.on('error', onError)
 const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
+w_1kv_nominators_update.on('error', onError)
 const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
+w_w3f_exposures_update.on('error', onError)
 const w_w3f_nominators_update = new Worker('w3f_nominators_update', f_w3f_nominators_update, qOpts)
+w_w3f_nominators_update.on('error', onError)
 const w_w3f_pools_update = new Worker('w3f_pools_update', f_w3f_pools_update, qOpts)
+w_w3f_pools_update.on('error', onError)
 const w_w3f_validator_location_stats_update = new Worker('w3f_validator_location_stats_update', f_w3f_validator_location_stats_update, qOpts)
+w_w3f_validator_location_stats_update.on('error', onError)
 const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
+w_w3f_validators_update.on('error', onError)
 
 const jobRetention = {
   removeOnComplete: {
