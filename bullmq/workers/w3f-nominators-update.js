@@ -41,7 +41,7 @@ export async function f_w3f_nominators_update (job) {
     })
     result = {
       nominators_updated: nominators.length,
-      nominators: nominators.map(n => { return { _id: n._id, accountId: n.accountId } }),
+      // nominators: nominators.map(n => { return { _id: n._id, accountId: n.accountId } }),
       // 'content-type': event.headers["content-type"]
       'content-type': 'application/json'
     }

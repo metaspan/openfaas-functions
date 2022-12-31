@@ -67,7 +67,7 @@ export async function f_1kv_nominators_update (job) {
     slog('res.data was empty')
     result = {
       reason: 'res.data was empty',
-      'body': JSON.stringify(event.body),
+      // 'body': JSON.stringify(event.body),
     }
   }
   console.log('1kv-nominators-update done...', CHAIN)
