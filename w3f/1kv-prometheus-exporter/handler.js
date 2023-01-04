@@ -1,5 +1,6 @@
 'use strict'
 
+const { default: axios } = require('axios')
 /*
   1KV Prometheus Exporter
 */
@@ -74,6 +75,42 @@ function calculateScore (score) {
   return items
 }
 
+const decimals = {
+  0:  1,
+  1:  10,
+  2:  100,
+  3:  1000,
+  4:  10000,
+  5:  100000,
+  6:  1000000,
+  7:  10000000,
+  8:  100000000,
+  9:  1000000000,
+  10: 10000000000,
+  11: 100000000000,
+  12: 1000000000000,
+}
+async function getChainProperties() {
+  var res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/rpc/system/properties`)
+  var properties = res.data || { tokenDecimals: 0, tokenSymbol: '' }
+  return properties
+}
+
+async function getBalances(ids = [], batchSize=25) {
+  console.debug('getBalances()', ids)
+  const accounts = []
+  for(var i = 0; i <= ids.length; i += batchSize) {
+    const batch = ids.slice(i, i + batchSize)
+    const res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
+    accounts.push(...res.data || [])
+  }
+  const free = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.free) || BigInt(0) }, BigInt(0))
+  const reserved = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.reserved) || BigInt(0) }, BigInt(0))
+  const miscFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.miscFrozen) || BigInt(0) }, BigInt(0))
+  const feeFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.feeFrozen) || BigInt(0) }, BigInt(0))
+  return { free, reserved, miscFrozen, feeFrozen }
+}
+
 module.exports = async (event, context) => {
 
   // expect /metrics/:stash
@@ -90,6 +127,8 @@ module.exports = async (event, context) => {
 
   await prepareDB()
 
+  const chainProperties = await getChainProperties()
+
   const latest = await dbc.collection('1kv_nomination').find({ chain: CHAIN }).sort({ era: -1 }).limit(1).toArray()
   // TODO get the current era from REST
   const projection = { chain: 0 } // exclude chain field from result
@@ -99,6 +138,7 @@ module.exports = async (event, context) => {
   const nominators = await dbc.collection('w3f_nominator').find({chain: CHAIN, nominators: stash}, {projection}).toArray()
   // console.log('nominators_1kv', nominators_1kv)
   var candidate = await dbc.collection('1kv_candidate').findOne({chain: CHAIN, stash: stash})
+  // var validator = await dbc.collection('w3f_validator').findOne({chain: CHAIN, stash: stash})
   // console.log('candidate:', candidate)
 
   if (!candidate) {
@@ -145,6 +185,14 @@ module.exports = async (event, context) => {
   checkNominated()
   items.push(`${PREFIX}_nominated_1kv{stash="${stash}"} ${candidate.nominated_1kv ? 1 : 0}`)
   items.push(`${PREFIX}_nominator_count{stash="${stash}"} ${nominators.length}`)
+  // TODO: find out why FNPCfXrsrA8775HGuRvK9seULKpcnxNTTKTGUL4h267YHvw is not in w3f_validators...?
+  // var nom_bals = getBalances(validator.nominators)
+  const denom = BigInt(decimals[chainProperties.tokenDecimals[0]])
+  var { free, reserved, miscFrozen, feeFrozen } = await getBalances(nominators.map(n => n.accountId))
+  items.push(`${PREFIX}_nominator_balances_free{stash="${stash}", symbol="${chainProperties.tokenSymbol[0]}"} ${free/denom}`)
+  items.push(`${PREFIX}_nominator_balances_reserved{stash="${stash}", symbol="${chainProperties.tokenSymbol[0]}"} ${reserved/denom}`)
+  items.push(`${PREFIX}_nominator_balances_misc_frozen{stash="${stash}", symbol="${chainProperties.tokenSymbol[0]}"} ${miscFrozen/denom}`)
+  items.push(`${PREFIX}_nominator_balances_fee_frozen{stash="${stash}", symbol="${chainProperties.tokenSymbol[0]}"} ${feeFrozen/denom}`)
   items.push(`${PREFIX}_valid{stash="${stash}"} ${checkValid(candidate.valid, candidate.validity) ? 1 : 0}`)
   candidate.validity.forEach(v => {
     items.push(`${PREFIX}_validity{stash="${stash}", type="${v.type}"} ${v.valid ? 1 : 0}`)
