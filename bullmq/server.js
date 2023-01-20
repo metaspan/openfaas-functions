@@ -139,14 +139,14 @@ async function clearQueue (jobname) {
   // const queueMQ = new QueueMQ()
   const { setQueues, replaceQueues } = createBullBoard({
     queues: [
-      new BullAdapter(q_1kv_candidates_update, { readOnlyMode: false }),
-      new BullAdapter(q_1kv_nominations_update, { readOnlyMode: false }),
-      new BullAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
-      new BullAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
-      new BullAdapter(q_w3f_nominators_update, { readOnlyMode: false }),
-      new BullAdapter(q_w3f_pools_update, { readOnlyMode: false }),
-      new BullAdapter(q_w3f_validator_location_stats_update, { readOnlyMode: false }),
-      new BullAdapter(q_w3f_validators_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_1kv_candidates_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_1kv_nominations_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_w3f_nominators_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_w3f_pools_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_w3f_validator_location_stats_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_w3f_validators_update, { readOnlyMode: false }),
     ],
     serverAdapter: serverAdapter,
   })
