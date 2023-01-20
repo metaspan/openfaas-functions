@@ -4,6 +4,7 @@ dotenv.config()
 import express from 'express'
 import { Queue, Worker } from 'bullmq'
 import { ExpressAdapter, createBullBoard, BullAdapter, BullMQAdapter } from '@bull-board/express'
+import axios from 'axios'
 
 import { asyncForEach } from './workers/utils.js'
 import { f_1kv_candidates_update } from './workers/1kv-candidates-update.js'
@@ -14,7 +15,6 @@ import { f_w3f_nominators_update } from './workers/w3f-nominators-update.js'
 import { f_w3f_pools_update } from './workers/w3f-pools-update.js'
 import { f_w3f_validator_location_stats_update } from './workers/w3f-validator-location-stats-update.js'
 import { f_w3f_validators_update } from './workers/w3f-validators-update.js'
-import axios from 'axios'
 
 const env = process.env
 const chains = ['kusama', 'polkadot']
