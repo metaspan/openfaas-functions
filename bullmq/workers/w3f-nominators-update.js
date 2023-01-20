@@ -30,15 +30,17 @@ export async function f_w3f_nominators_update (job) {
   try {
     dbc = await prepareDB(MONGO_CONNECTION_URL, MONGO_DATABASE)
     const col = dbc.collection(MONGO_COLLECTION)
+    const updatedAt = moment().utc().format()
     nominators.forEach(async (nominator) => {
       const query = {
         chain: CHAIN,
         accountId: nominator.accountId,
       }
       nominator.chain = CHAIN
-      nominator.updatedAt = moment().utc().format()
+      nominator.updatedAt = updatedAt
       const result = await col.replaceOne(query, nominator, { upsert: true })
     })
+    await col.deleteMany({ chain: CHAIN, updatedAt: { $lt: updatedAt } })
     result = {
       nominators_updated: nominators.length,
       // nominators: nominators.map(n => { return { _id: n._id, accountId: n.accountId } }),
