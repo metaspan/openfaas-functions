@@ -97,17 +97,23 @@ async function getChainProperties() {
 }
 
 async function getBalances(ids = [], batchSize=25) {
-  console.debug('getBalances()', ids)
+  console.debug('getBalances() for', ids.length, 'ids')
   const accounts = []
   for(var i = 0; i <= ids.length; i += batchSize) {
+    console.debug(`-- getting batch ${i}`)
     const batch = ids.slice(i, i + batchSize)
-    const res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
-    accounts.push(...res.data || [])
+    //const res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
+    const res = await dbc.collection('w3f_account').find({ chain: CHAIN, accountId: { $in: batch }}).toArray()
+    // console.log(res)
+    accounts.push(...res || [])
   }
+  console.log('we have', accounts.length, 'accounts')
+  console.log('acccounts[0]', accounts[0])
   const free = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.free) || BigInt(0) }, BigInt(0))
   const reserved = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.reserved) || BigInt(0) }, BigInt(0))
   const miscFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.miscFrozen) || BigInt(0) }, BigInt(0))
   const feeFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.feeFrozen) || BigInt(0) }, BigInt(0))
+  console.log(free, reserved, miscFrozen, feeFrozen)
   return { free, reserved, miscFrozen, feeFrozen }
 }
 
