@@ -15,6 +15,7 @@ import { f_w3f_nominators_update } from './workers/w3f-nominators-update.js'
 import { f_w3f_pools_update } from './workers/w3f-pools-update.js'
 import { f_w3f_validator_location_stats_update } from './workers/w3f-validator-location-stats-update.js'
 import { f_w3f_validators_update } from './workers/w3f-validators-update.js'
+import { f_w3f_nominations_update } from './workers/w3f-nominations-update.js'
 
 const env = process.env
 const chains = ['kusama', 'polkadot']
@@ -41,7 +42,8 @@ const jobs = [
   'w3f_nominators',
   'w3f_pools',
   'w3f_validator_location_stats',
-  'w3f_validators'
+  'w3f_validators',
+  'w3f_nominations'
 ]
 
 async function onError (job, err) {
@@ -62,6 +64,7 @@ const q_w3f_nominators_update = new Queue('w3f_nominators_update', qOpts)
 const q_w3f_pools_update = new Queue('w3f_pools_update', qOpts)
 const q_w3f_validator_location_stats_update = new Queue('w3f_validator_location_stats_update', qOpts)
 const q_w3f_validators_update = new Queue('w3f_validators_update', qOpts)
+const q_w3f_nominations_update = new Queue('w3f_nominations_update', qOpts)
 
 const w_1kv_candidates_update = new Worker('1kv_candidates_update', f_1kv_candidates_update, qOpts)
 const w_1kv_nominations_update = new Worker('1kv_nominations_update', f_1kv_nominations_update, qOpts)
@@ -71,6 +74,7 @@ const w_w3f_nominators_update = new Worker('w3f_nominators_update', f_w3f_nomina
 const w_w3f_pools_update = new Worker('w3f_pools_update', f_w3f_pools_update, qOpts)
 const w_w3f_validator_location_stats_update = new Worker('w3f_validator_location_stats_update', f_w3f_validator_location_stats_update, qOpts)
 const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
+const w_w3f_nominations_update = new Worker('w3f_nominations_update', f_w3f_nominations_update, qOpts)
 
 // handle all error/failed
 jobs.forEach(job => {
@@ -128,6 +132,8 @@ async function clearQueue (jobname) {
         { repeat: { pattern: '06,36 * * * *' }, ...jobRetention })
       await q_w3f_validators_update.add(`w3f_validators_${CHAIN}`, jOpts,
         { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
+      await q_w3f_nominations_update.add(`w3f_nominations_${CHAIN}`, jOpts,
+        { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
     })
   }
 
@@ -147,6 +153,7 @@ async function clearQueue (jobname) {
       new BullMQAdapter(q_w3f_pools_update, { readOnlyMode: false }),
       new BullMQAdapter(q_w3f_validator_location_stats_update, { readOnlyMode: false }),
       new BullMQAdapter(q_w3f_validators_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_w3f_nominations_update, { readOnlyMode: false }),
     ],
     serverAdapter: serverAdapter,
   })

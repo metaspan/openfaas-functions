@@ -51,6 +51,12 @@ const closeDB = async function () {
   }
 }
 
+const getAccountsMulti = async function (ids=[]) {
+  res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/system/accountMulti`, { params: ids })
+  console.debug(res.data)
+  return res?.data || []
+}
+
 const getAllExposures = async function (CHAIN) {
   var res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/staking/activeEra`)
   var activeEra = res?.data?.activeEra || 0
@@ -188,6 +194,7 @@ export {
   createUrl,
   prepareDB,
   closeDB,
+  getAccountsMulti,
   getAllExposures,
   getAllNominators,
   getAllPools,
