@@ -51,26 +51,27 @@ function calculateScore (score) {
   var total = 0.0
   var items = []
   if (!score) return items
-  const randomness = score.randomness
-  delete score.randomness
+  // const randomness = score.randomness
+  // delete score.randomness
   Object.keys(score).forEach((key) => {
     // console.log('checking ' + key)
-    if (!['_id',
+    if (![
+      '_id',
       'updated',
       'address',
       '__v',
-      'total',
-      'aggregate',
-      'randomness',
+      // 'total',
+      // 'aggregate',
+      // 'randomness',
       'session'
     ].includes(key)) {
       total += score[key]
       items.push(`${PREFIX}_score{category="${key}", stash="${score.address}"} ${score[key]}`)
     }
   })
-  const aggregate = total * (100 + randomness)/100
-  items.push(`${PREFIX}_score{category="total", stash="${score.address}"} ${total}`)
-  items.push(`${PREFIX}_score{category="aggregate", stash="${score.address}"} ${aggregate}`)
+  // const aggregate = total * (100 + randomness)/100
+  // items.push(`${PREFIX}_score{category="total", stash="${score.address}"} ${total}`)
+  // items.push(`${PREFIX}_score{category="aggregate", stash="${score.address}"} ${aggregate}`)
   // console.log('items', items)
   return items
 }

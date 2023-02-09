@@ -13,6 +13,7 @@ functions:
     - dotenv
     environment:
       CHAIN: kusama
+      exec_timeout: "90s"
   w3f-1kv-prometheus-exporter-polkadot:
     lang: node12
     handler: ./1kv-prometheus-exporter
@@ -21,3 +22,4 @@ functions:
     - dotenv
     environment:
       CHAIN: polkadot
+      exec_timeout: "90s"
