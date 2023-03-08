@@ -51,26 +51,27 @@ function calculateScore (score) {
   var total = 0.0
   var items = []
   if (!score) return items
-  const randomness = score.randomness
-  delete score.randomness
+  // const randomness = score.randomness
+  // delete score.randomness
   Object.keys(score).forEach((key) => {
     // console.log('checking ' + key)
-    if (!['_id',
+    if (![
+      '_id',
       'updated',
       'address',
       '__v',
-      'total',
-      'aggregate',
-      'randomness',
+      // 'total',
+      // 'aggregate',
+      // 'randomness',
       'session'
     ].includes(key)) {
       total += score[key]
       items.push(`${PREFIX}_score{category="${key}", stash="${score.address}"} ${score[key]}`)
     }
   })
-  const aggregate = total * (100 + randomness)/100
-  items.push(`${PREFIX}_score{category="total", stash="${score.address}"} ${total}`)
-  items.push(`${PREFIX}_score{category="aggregate", stash="${score.address}"} ${aggregate}`)
+  // const aggregate = total * (100 + randomness)/100
+  // items.push(`${PREFIX}_score{category="total", stash="${score.address}"} ${total}`)
+  // items.push(`${PREFIX}_score{category="aggregate", stash="${score.address}"} ${aggregate}`)
   // console.log('items', items)
   return items
 }
@@ -96,19 +97,24 @@ async function getChainProperties() {
   return properties
 }
 
-async function getBalances(ids = [], batchSize=125) {
-  console.debug('getBalances()', ids)
+async function getBalances(ids = [], batchSize=25) {
+  console.debug('getBalances() for', ids.length, 'ids')
   const accounts = []
   for(var i = 0; i <= ids.length; i += batchSize) {
     console.debug(`-- getting batch ${i}`)
     const batch = ids.slice(i, i + batchSize)
-    const res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
-    accounts.push(...res.data || [])
+    //const res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
+    const res = await dbc.collection('w3f_account').find({ chain: CHAIN, accountId: { $in: batch }}).toArray()
+    // console.log(res)
+    accounts.push(...res || [])
   }
+  console.log('we have', accounts.length, 'accounts')
+  console.log('acccounts[0]', accounts[0])
   const free = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.free) || BigInt(0) }, BigInt(0))
   const reserved = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.reserved) || BigInt(0) }, BigInt(0))
   const miscFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.miscFrozen) || BigInt(0) }, BigInt(0))
   const feeFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.feeFrozen) || BigInt(0) }, BigInt(0))
+  console.log(free, reserved, miscFrozen, feeFrozen)
   return { free, reserved, miscFrozen, feeFrozen }
 }
 
