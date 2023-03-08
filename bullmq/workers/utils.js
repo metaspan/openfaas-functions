@@ -51,8 +51,9 @@ const closeDB = async function () {
   }
 }
 
-const getAccountsMulti = async function (ids=[]) {
-  res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/system/accountMulti`, { params: ids })
+const getAccountsMulti = async function (chain, ids=[]) {
+  console.debug('utils.js: getAccountsMulti', chain, ids)
+  const res = await axios.get(`${REST_API_BASE}/${chain}/query/system/accountMulti`, { params: { ids } })
   console.debug(res.data)
   return res?.data || []
 }

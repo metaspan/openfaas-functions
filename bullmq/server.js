@@ -16,18 +16,14 @@ import { f_w3f_pools_update } from './workers/w3f-pools-update.js'
 import { f_w3f_validator_location_stats_update } from './workers/w3f-validator-location-stats-update.js'
 import { f_w3f_validators_update } from './workers/w3f-validators-update.js'
 import { f_w3f_nominations_update } from './workers/w3f-nominations-update.js'
+import { f_dock_auto_payout } from './functions/f_dock_auto_payout.js'
+import { f_log_test } from './functions/f_log_test.js'
 
 const env = process.env
 const chains = ['kusama', 'polkadot']
 
-// const MONGO_HOST = env.MONGO_HOST || '192.168.1.2'
-// const MONGO_PORT = env.MONGO_PORT || '32768'
-// const MONGO_USERID = env.MONGO_USERID || ''
-// const MONGO_PASSWD = env.MONGO_PASSWD || ''
-// const MONGO_DATABASE = env.MONGO_DATABASE || 'mspn_io_api'
-// const CHAIN = 'kusama'
-
 const qOpts = {
+  // connection to Redis
   connection: {
     host: "192.168.1.38",
     port: 6379
@@ -35,15 +31,17 @@ const qOpts = {
 };
 
 const jobs = [
-  '1kv_candidates',
-  '1kv_nominations',
-  '1kv_nominators',
-  'w3f_exposures',
-  'w3f_nominators',
-  'w3f_pools',
-  'w3f_validator_location_stats',
-  'w3f_validators',
-  'w3f_nominations'
+  '1kv_candidates_update',
+  '1kv_nominations_update',
+  '1kv_nominators_update',
+  'w3f_exposures_update',
+  'w3f_nominators_update',
+  'w3f_pools_update',
+  'w3f_validator_location_stats_update',
+  'w3f_validators_update',
+  'w3f_nominations_update',
+  'dock_auto_payout',
+  'log_test',
 ]
 
 async function onError (job, err) {
@@ -65,6 +63,8 @@ const q_w3f_pools_update = new Queue('w3f_pools_update', qOpts)
 const q_w3f_validator_location_stats_update = new Queue('w3f_validator_location_stats_update', qOpts)
 const q_w3f_validators_update = new Queue('w3f_validators_update', qOpts)
 const q_w3f_nominations_update = new Queue('w3f_nominations_update', qOpts)
+const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
+const q_log_test = new Queue('log_test', qOpts)
 
 const w_1kv_candidates_update = new Worker('1kv_candidates_update', f_1kv_candidates_update, qOpts)
 const w_1kv_nominations_update = new Worker('1kv_nominations_update', f_1kv_nominations_update, qOpts)
@@ -75,10 +75,12 @@ const w_w3f_pools_update = new Worker('w3f_pools_update', f_w3f_pools_update, qO
 const w_w3f_validator_location_stats_update = new Worker('w3f_validator_location_stats_update', f_w3f_validator_location_stats_update, qOpts)
 const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
 const w_w3f_nominations_update = new Worker('w3f_nominations_update', f_w3f_nominations_update, qOpts)
+const w_dock_auto_payout = new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
+const w_log_test = new Worker('log_test', f_log_test, qOpts)
 
 // handle all error/failed
 jobs.forEach(job => {
-  const worker = eval(`w_${job}_update`)
+  const worker = eval(`w_${job}`)
   worker.on('error', (err) => onError(job, err))
   worker.on('failed', (event) => onFailed(job, event))
 })
@@ -94,7 +96,7 @@ const jobRetention = {
 }
 
 async function clearQueue (jobname) {
-  let qname = eval(`q_${jobname}_update`)
+  let qname = eval(`q_${jobname}`)
   await qname.pause()
   // Removes all jobs that are waiting or delayed, but not active, completed or failed
   await qname.drain()
@@ -116,24 +118,26 @@ async function clearQueue (jobname) {
       const jOpts = { CHAIN }
 
       await q_1kv_candidates_update.add(`1kv_candidates_${CHAIN}`, jOpts,
-        { repeat: { pattern: '00,30 * * * *' }, ...jobRetention })
+        { group: { id: 1 }, repeat: { pattern: '00,30 * * * *' }, ...jobRetention })
       await q_1kv_nominations_update.add(`1kv_nominations_${CHAIN}`, jOpts,
-        { repeat: { pattern: '01,31 * * * *' }, ...jobRetention })
+        { group: { id: 1 }, repeat: { pattern: '01,31 * * * *' }, ...jobRetention })
       await q_1kv_nominators_update.add(`1kv_nominators_${CHAIN}`, jOpts,
-        { repeat: { pattern: '02,32 * * * *' }, ...jobRetention })
+        { group: { id: 1 }, repeat: { pattern: '02,32 * * * *' }, ...jobRetention })
       await q_w3f_exposures_update.add(`w3f_exposures_${CHAIN}`, jOpts,
-        { repeat: { pattern: '03,33 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '03,33 * * * *' }, ...jobRetention })
       await q_w3f_nominators_update.add(`w3f_nominators_${CHAIN}`, jOpts,
         // once per hour
-        { repeat: { pattern: '04 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '04 * * * *' }, ...jobRetention })
       await q_w3f_pools_update.add(`w3f_pools_${CHAIN}`, jOpts,
-        { repeat: { pattern: '05,35 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '05,35 * * * *' }, ...jobRetention })
       await q_w3f_validator_location_stats_update.add(`w3f_validator_location_stats_${CHAIN}`, jOpts,
-        { repeat: { pattern: '06,36 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '06,36 * * * *' }, ...jobRetention })
       await q_w3f_validators_update.add(`w3f_validators_${CHAIN}`, jOpts,
-        { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
       await q_w3f_nominations_update.add(`w3f_nominations_${CHAIN}`, jOpts,
-        { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
+      // dock-alert-bot will add jobs for dock_auto_payout
+      // I will add jobs for log_test
     })
   }
 
@@ -154,6 +158,8 @@ async function clearQueue (jobname) {
       new BullMQAdapter(q_w3f_validator_location_stats_update, { readOnlyMode: false }),
       new BullMQAdapter(q_w3f_validators_update, { readOnlyMode: false }),
       new BullMQAdapter(q_w3f_nominations_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_dock_auto_payout, { readOnlyMode: false }),
+      new BullMQAdapter(q_log_test, { readOnlyMode: false }),
     ],
     serverAdapter: serverAdapter,
   })

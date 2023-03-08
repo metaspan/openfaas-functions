@@ -1,9 +1,10 @@
 #!/bin/bash
 
-. .env
+echo `date`
+. ./.env
 
 # Openfaas login
-faas-cli login --password ${ADMIN_PASSWORD}
+faas-cli login --password ${OPENFAAS_ADMIN_PASSWORD}
 # Registry (docker) login
 faas-cli registry-login -u derekc --password ${DOCKER_PASSWORD}
 
