@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@bull-board/express": "^4.9.0",
+    "@docknetwork/sdk": "^2.10.0",
+    "@polkadot/ui-keyring": "^2.12.1",
     "axios": "^1.2.1",
     "bullmq": "^3.5.1",
     "dotenv": "^16.0.3",
