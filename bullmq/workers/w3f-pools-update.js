@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 import moment from 'moment'
-import { createUrl, prepareDB, getAllPools } from './utils.js'
+import { REST_API_BASE, createUrl, prepareDB, getAllPools } from './utils.js'
 
 function slog (str) { console.log('w3f-exposures:' + str) }
 

@@ -192,6 +192,7 @@ async function asyncForEach(array, callback) {
 }
 
 export {
+  REST_API_BASE,
   createUrl,
   prepareDB,
   closeDB,
