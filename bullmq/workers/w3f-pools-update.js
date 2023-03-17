@@ -23,15 +23,16 @@ export async function f_w3f_pools_update (job) {
   try {
     slog(job.name + ': getting members')
     // var entries = await api.query.nominationPools.poolMembers.entries()
-    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/poolMembers`)
-    members = res?.data?.poolMembers || {}
+    const res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/poolMembers`)
+    members = res?.data?.poolMembers || []
+    // console.log('members', members)
     slog('getting pools')
     pools = await getAllPools(CHAIN)
     slog(`... found ${pools.length}`)
   } catch (err) {
     job.log(err)
     // console.warn(`ERROR: ${FUNCTION}`)
-    // console.warn(err)
+    console.warn(err)
     // await logger.error(FUNCTION, err)
   }
 

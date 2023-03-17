@@ -136,7 +136,7 @@ async function getAllPools (CHAIN) {
     // pool.points = rewardPools.points
     // console.log(pool.rewardPools)
 
-    pool.members = members[pool.id]
+    // pool.members = members[pool.id]
     // console.log(pool.members)
 
     // pool.subPoolStorage = await api.query.nominationPools.subPoolsStorage(pid)
