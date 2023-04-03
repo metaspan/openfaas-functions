@@ -1,0 +1,19 @@
+{
+  "name": "metaspan-clicktrack",
+  "version": "1.0.0",
+  "description": "OpenFaaS Function",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [],
+  "author": "OpenFaaS Ltd",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "dotenv": "^16.0.1",
+    "moment-timezone": "^0.5.34",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.3.3"
+  }
+}
