@@ -1,0 +1,6 @@
+template
+build
+.env
+node_modules
+archive
+metaspan/web-app
