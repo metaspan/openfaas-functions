@@ -23,7 +23,8 @@ functions:
       CHAIN: polkadot
 
   w3f-validators-kusama-update:
-    lang: node18-dc
+    # lang: node18-dc
+    lang: node18
     handler: ./validators/update
     image: derekc/w3f-validators-update:latest
     secrets:
@@ -33,7 +34,8 @@ functions:
     # annotations:
     #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
   w3f-validators-polkadot-update:
-    lang: node18-dc
+    # lang: node18-dc
+    lang: node18
     handler: ./validators/update
     image: derekc/w3f-validators-update:latest
     secrets:
