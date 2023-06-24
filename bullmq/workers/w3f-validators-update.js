@@ -22,7 +22,7 @@ export async function f_w3f_validators_update (job) {
   function calcValidatorNominators() {
     validator_nominators = {}
     nominators.forEach(n => {
-      n.targets.forEach(t => {
+      n.targets?.forEach(t => {
         if (validator_nominators[t]) {
           if (!validator_nominators[t].includes(n.accountId)) {
             validator_nominators[t].push(n.accountId)

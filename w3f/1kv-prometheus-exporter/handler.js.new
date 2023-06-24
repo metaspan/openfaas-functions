@@ -20,8 +20,6 @@ const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
 const MONGO_COLLECTION = '1kv_nominator'
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
-const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://gateway:8080'
-
 const TOKENS = {
   kusama: 'KSM',
   polkadot: 'DOT'
@@ -94,28 +92,33 @@ const decimals = {
   12: 1000000000000,
 }
 async function getChainProperties() {
-  var res = await axios.get(`${DOTASMA_API_BASE}/${CHAIN}/rpc/system/properties`)
+  var res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/rpc/system/properties`)
   var properties = res.data || { tokenDecimals: 0, tokenSymbol: '' }
   return properties
 }
 
+<<<<<<< HEAD
+async function getBalances(ids = [], batchSize=125) {
+  console.debug('getBalances()', ids)
+=======
 async function getBalances(ids = [], batchSize=25) {
   console.debug('getBalances() for', ids.length, 'ids')
+>>>>>>> d33844766dcdaa48395de317bdd7c143a36faeba
   const accounts = []
   for(var i = 0; i <= ids.length; i += batchSize) {
     console.debug(`-- getting batch ${i}`)
     const batch = ids.slice(i, i + batchSize)
-    //const res = await axios.get(`${DOTASMA_API_BASE}/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
+    //const res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/system/accountMulti`, { params: { ids: batch }})
     const res = await dbc.collection('w3f_account').find({ chain: CHAIN, accountId: { $in: batch }}).toArray()
     // console.log(res)
     accounts.push(...res || [])
   }
   console.log('we have', accounts.length, 'accounts')
-  console.log('acccounts[0] 123', accounts[0])
-  const free = accounts.reduce((current, account, idx) => { return current + BigInt(account.data ? account.data.free : 0) || BigInt(0) }, BigInt(0))
-  const reserved = accounts.reduce((current, account, idx) => { return current + BigInt(account.data ? account.data.reserved : 0) || BigInt(0) }, BigInt(0))
-  const miscFrozen = 0n // accounts.reduce((current, account, idx) => { return current + BigInt(account.data ? account.data.miscFrozen : 0) || BigInt(0) }, BigInt(0))
-  const feeFrozen = 0n // accounts.reduce((current, account, idx) => { return current + BigInt(account.data ? account.data.feeFrozen : 0) || BigInt(0) }, BigInt(0))
+  console.log('acccounts[0]', accounts[0])
+  const free = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.free) || BigInt(0) }, BigInt(0))
+  const reserved = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.reserved) || BigInt(0) }, BigInt(0))
+  const miscFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.miscFrozen) || BigInt(0) }, BigInt(0))
+  const feeFrozen = accounts.reduce((current, account, idx) => { return current + BigInt(account.data.feeFrozen) || BigInt(0) }, BigInt(0))
   console.log(free, reserved, miscFrozen, feeFrozen)
   return { free, reserved, miscFrozen, feeFrozen }
 }

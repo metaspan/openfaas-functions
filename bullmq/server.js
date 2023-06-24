@@ -17,6 +17,7 @@ import { f_w3f_validator_location_stats_update } from './workers/w3f-validator-l
 import { f_w3f_validators_update } from './workers/w3f-validators-update.js'
 import { f_w3f_nominations_update } from './workers/w3f-nominations-update.js'
 import { f_dock_auto_payout } from './functions/f_dock_auto_payout.js'
+import { f_log_test } from './functions/f_log_test.js'
 
 const env = process.env
 const chains = ['kusama', 'polkadot']
@@ -39,7 +40,8 @@ const jobs = [
   'w3f_validator_location_stats_update',
   'w3f_validators_update',
   'w3f_nominations_update',
-  'dock_auto_payout'
+  'dock_auto_payout',
+  'log_test',
 ]
 
 async function onError (job, err) {
@@ -62,6 +64,7 @@ const q_w3f_validator_location_stats_update = new Queue('w3f_validator_location_
 const q_w3f_validators_update = new Queue('w3f_validators_update', qOpts)
 const q_w3f_nominations_update = new Queue('w3f_nominations_update', qOpts)
 const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
+const q_log_test = new Queue('log_test', qOpts)
 
 const w_1kv_candidates_update = new Worker('1kv_candidates_update', f_1kv_candidates_update, qOpts)
 const w_1kv_nominations_update = new Worker('1kv_nominations_update', f_1kv_nominations_update, qOpts)
@@ -73,6 +76,7 @@ const w_w3f_validator_location_stats_update = new Worker('w3f_validator_location
 const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
 const w_w3f_nominations_update = new Worker('w3f_nominations_update', f_w3f_nominations_update, qOpts)
 const w_dock_auto_payout = new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
+const w_log_test = new Worker('log_test', f_log_test, qOpts)
 
 // handle all error/failed
 jobs.forEach(job => {
@@ -114,9 +118,9 @@ async function clearQueue (jobname) {
       const jOpts = { CHAIN }
 
       await q_1kv_candidates_update.add(`1kv_candidates_${CHAIN}`, jOpts,
-        { repeat: { pattern: '00,30 * * * *' }, ...jobRetention })
+        { group: { id: 1 }, repeat: { pattern: '00,30 * * * *' }, ...jobRetention })
       await q_1kv_nominations_update.add(`1kv_nominations_${CHAIN}`, jOpts,
-        { repeat: { pattern: '01,31 * * * *' }, ...jobRetention })
+        { group: { id: 1 }, repeat: { pattern: '01,31 * * * *' }, ...jobRetention })
       await q_1kv_nominators_update.add(`1kv_nominators_${CHAIN}`, jOpts,
         { repeat: { pattern: '02,32 * * * *' }, ...jobRetention })
       // =================== we will trigger the w3f jobs from the alert bot  ======================
@@ -126,7 +130,7 @@ async function clearQueue (jobname) {
       //   // once per hour
       //   { repeat: { pattern: '04 * * * *' }, ...jobRetention })
       await q_w3f_pools_update.add(`w3f_pools_${CHAIN}`, jOpts,
-        { repeat: { pattern: '05,35 * * * *' }, ...jobRetention })
+        { group: { id: 2 }, repeat: { pattern: '05,35 * * * *' }, ...jobRetention })
       await q_w3f_validator_location_stats_update.add(`w3f_validator_location_stats_${CHAIN}`, jOpts,
         { repeat: { pattern: '06,36 * * * *' }, ...jobRetention })
       // await q_w3f_validators_update.add(`w3f_validators_${CHAIN}`, jOpts,
@@ -155,6 +159,7 @@ async function clearQueue (jobname) {
       new BullMQAdapter(q_w3f_validators_update, { readOnlyMode: false }),
       new BullMQAdapter(q_w3f_nominations_update, { readOnlyMode: false }),
       new BullMQAdapter(q_dock_auto_payout, { readOnlyMode: false }),
+      new BullMQAdapter(q_log_test, { readOnlyMode: false }),
     ],
     serverAdapter: serverAdapter,
   })

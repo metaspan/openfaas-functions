@@ -24,13 +24,19 @@ export async function f_w3f_nominations_update (job) {
   var accounts = []
 
   try {
-    nominators = await dbc.collection('w3f_nominator').find({chain: CHAIN}, { _id: 0, accountId: 1})
+    dbc = await prepareDB(MONGO_CONNECTION_URL, MONGO_DATABASE)
+    nominators = await dbc.collection('w3f_nominator').find({chain: CHAIN}).toArray()
+    // console.log(nominators)
+    console.log(`there are ${nominators.length} nominators`)
     const chunksize = 50
     for(var i = 0; i < nominators.length; i += chunksize) {
-      const ids = nominators.slice(i, i + chunksize)
-      const accs = await getAccountsMulti(ids)
-      accounts.push(...accs.map(a => a.toJSON()))
+      const ids = nominators.slice(i, i + chunksize).map(m => m.accountId)
+      // console.debug('ids', ids)
+      const accs = await getAccountsMulti(CHAIN, ids)
+      // console.debug('accs', accs)
+      accounts.push(...accs)
     }
+    console.log(`there are ${accounts.length} accounts`)
   } catch (err) {
     console.error(err)
     // await logger.error(FUNCTION, err)
@@ -38,7 +44,6 @@ export async function f_w3f_nominations_update (job) {
 
   console.debug('updating database...')
   try {
-    dbc = await prepareDB(MONGO_CONNECTION_URL, MONGO_DATABASE)
     const col = dbc.collection(MONGO_COLLECTION)
     const updatedAt = moment().utc().format()
     nominators.forEach(async (nominator, idx) => {
@@ -46,7 +51,7 @@ export async function f_w3f_nominations_update (job) {
         chain: CHAIN,
         accountId: nominator.accountId,
       }
-      const account = accounts[idx]
+      const account = accounts[idx] || {}
       account.accountId = nominator.accountId
       account.chain = CHAIN
       account.updatedAt = updatedAt

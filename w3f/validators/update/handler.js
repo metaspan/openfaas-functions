@@ -15,7 +15,7 @@ const logger = new HTTPLogger({hostname: LOGGER_HOST, port: LOGGER_PORT})
 
 const CHAIN = process.env.CHAIN || 'kusama'
 const PROVIDER = process.env.PROVIDER || 'local'
-const REST_API_BASE = process.env.REST_API_BASE || 'http://192.168.1.92:3000'
+const DOTSAMA_API_BASE = process.env.DOTSAMA_API_BASE || 'http://192.168.1.92:3000'
 
 // this is not complete, only contains 1kv noms
 // const UPDATE_URL = `https://${CHAIN}.w3f.community/nominators`
@@ -103,7 +103,7 @@ async function getAllValidators (batchSize=256) {
   // validator_ids = [...new Set(validator_ids.sort())]
 
   // const entries = await api.query.staking.validators.entries() // The map from (wannabe) validator stash key to the preferences of that validator.
-  const res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/staking/validators`)
+  const res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/staking/validators`)
   var vals = res?.data?.validators || []
   // entries.forEach(([key, validator]) => {
   //   // console.log(key.toHuman()[0])
@@ -117,7 +117,7 @@ async function getAllValidators (batchSize=256) {
   for(var i = 0; i < vals.length; i += batchSize) {
     const ids = vals.slice(i, i + batchSize).map(m => m.stash)
     // const identities = await api.query.identity.identityOf.multi(ids)
-    res = axios.post(`${REST_API_BASE}/${CHAIN}/query/identity/identityOf`, { ids })
+    res = axios.post(`${DOTSAMA_API_BASE}/${CHAIN}/query/identity/identityOf`, { ids })
     const identities = res?.data?.identities || []
     // let example = {
     //   "judgements":[[1,{"reasonable":null}]],
@@ -161,7 +161,7 @@ async function getAllNominators (batchSize=256) {
   // }
   // const nominators = await api.query.staking.nominators.entries();
   // const nominatorAddresses = nominators.map(([address]) => ""+address.toHuman()[0]);
-  var res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/staking/nominators`)
+  var res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/staking/nominators`)
   const nominatorAddresses = res?.data?.nominators || []
 
   console.debug(`the nominator addresses size is ${nominatorAddresses.length}, working in chunks of ${batchSize}`)
@@ -178,7 +178,7 @@ async function getAllNominators (batchSize=256) {
   for (const chunk of nominatorAddressesChucked) {
     console.debug(`${++idx}/${numChunks} - the handled chunk size is ${chunk.length}`)
     // const accounts = await api.derive.staking.accounts(chunk)
-    res = await axios.post(`${REST_API_BASE}/${CHAIN}/derive/staking/accounts`, { ids: chunk })
+    res = await axios.post(`${DOTSAMA_API_BASE}/${CHAIN}/derive/staking/accounts`, { ids: chunk })
     const accounts = res?.data?.accounts || []
     // accounts.forEach((a) => {
     //   if (a) {

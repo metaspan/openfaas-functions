@@ -61,17 +61,22 @@ faas-cli login --password secret123!
 - http://GATEWAY_IP:8080/function/w3f-1kv-nominations-kusama-update
 
 
-# SECRETS
+# .env
 
-There is a ./secrets folder.
+There is a `.env` file. 
+Then use `. .env` to login
+
 ```
-faas-cli secret [create|update] dotenv
-... paste the text of the dotenv.json file ```
-ctrl-d to save
+#!/bin/bash
+
+# GATEWAY LOGIN
+export GATEWAY_IP="192.168.1.91" # ip of your openfaas/faasd gateway
+export OPENFAAS_PREFIX=derekc
+export OPENFAAS_URL=http://$GATEWAY_IP:8080
+export OPENFAAS_ADMIN_PASSWORD= [ get this from password manager ]
+
+export DOCKER_PASSWORD= [ get this from password manager ]
+
 ```
 
-# TODO
-
-- implement cron-adapter / connecter native to faasd 
-- WHERE DOES w3f-validators FIT ???
 

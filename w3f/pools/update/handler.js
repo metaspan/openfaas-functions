@@ -15,7 +15,7 @@ const logger = new HTTPLogger({hostname: LOGGER_HOST, port: LOGGER_PORT})
 
 const CHAIN = process.env.CHAIN || 'kusama'
 const PROVIDER = process.env.PROVIDER || 'local'
-const REST_API_BASE = process.env.REST_API_BASE || 'http://192.168.1.92:3000'
+const DOTSAMA_API_BASE = process.env.DOTSAMA_API_BASE || 'http://192.168.1.92:3000'
 
 const fs = require('fs')
 const env = JSON.parse(fs.readFileSync('/var/openfaas/secrets/dotenv', 'utf-8'))
@@ -26,6 +26,8 @@ const MONGO_USERID = env.MONGO_USERID
 const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
 const MONGO_COLLECTION = 'w3f_pool'
+const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://gateway:8080'
+
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 
 const FUNCTION = `w3f-pools-${CHAIN}-update`
@@ -86,7 +88,7 @@ async function getAllPools () {
   // var poolMembers = res?.data?.poolMembers || []
 
   // var lastId = await api.query.nominationPools.lastPoolId()
-  var res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/lastPoolId`)
+  var res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/nominationPools/lastPoolId`)
   var lastId = res?.data?.lastPoolId || 0
   for (var pid = 1; pid <= lastId; pid++) {
     slog(`pool ${pid} =====================`)
@@ -105,7 +107,7 @@ async function getAllPools () {
     // }
     // var bondedPools = await api.query.nominationPools.bondedPools(pid)
     // bondedPools = bondedPools.toJSON()
-    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/bondedPools?id=${pid}`)
+    res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/nominationPools/bondedPools?id=${pid}`)
     var bondedPools = res?.data?.bondedPools || {}
     pool.points = bondedPools?.points || 0
     pool.state = bondedPools?.state || 'Destroyed'
@@ -116,14 +118,14 @@ async function getAllPools () {
     // pool name is in the meta
     // pool.name = await api.query.nominationPools.metadata(pid)
     // pool.name = hexToString(pool.name.toString())
-    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/metadata?id=${pid}`)
+    res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/nominationPools/metadata?id=${pid}`)
     pool.name = res?.data?.metadata || ''
     // console.log(pool.name)
 
     // {balance: 0, totalEarnings: 0, points: 0}
     // var rewardPools = await api.query.nominationPools.rewardPools(pid)
     // rewardPools = rewardPools.toJSON()
-    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/metadata?id=${pid}`)
+    res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/nominationPools/metadata?id=${pid}`)
     var rewardPools = res?.data?.rewardPools || {}
     pool.balance = rewardPools?.balance || 0
     pool.totalEarnings = rewardPools?.totalEarnings || 0
@@ -135,7 +137,7 @@ async function getAllPools () {
 
     // pool.subPoolStorage = await api.query.nominationPools.subPoolsStorage(pid)
     // pool.subPoolStorage = pool.subPoolStorage.toJSON()
-    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/subPoolsStorage?id=${pid}`)
+    res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/nominationPools/subPoolsStorage?id=${pid}`)
     pool.subPoolsStorage = res?.data?.subPoolsStorage || {}
 
     ret.push(pool)
@@ -167,7 +169,7 @@ module.exports = async (event, context) => {
     // slog(`... found ${candidates.length}`)
     slog('getting members')
     // var entries = await api.query.nominationPools.poolMembers.entries()
-    res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/nominationPools/poolMembers`)
+    res = await axios.get(`${DOTSAMA_API_BASE}/${CHAIN}/query/nominationPools/poolMembers`)
     members = res?.data?.poolMembers || {}
     // // console.log('num entries', entries.length)
     // members = entries.reduce((all, [{ args: [accountId] }, optMember]) => {

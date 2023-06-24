@@ -18,7 +18,6 @@ const logger = new HTTPLogger({hostname: LOGGER_HOST, port: LOGGER_PORT})
 
 const CHAIN = process.env.CHAIN || 'kusama'
 const PROVIDER = process.env.PROVIDER || 'local'
-const REST_API_BASE = process.env.REST_API_BASE || 'http://192.168.1.92:3000'
 
 const MONGO_HOST = env.MONGO_HOST
 const MONGO_PORT = env.MONGO_PORT
@@ -26,6 +25,7 @@ const MONGO_USERID = env.MONGO_USERID
 const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
 const MONGO_COLLECTION = 'w3f_nominator'
+const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://gateway:8080'
 
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 
@@ -44,7 +44,7 @@ async function getAllNominators (batchSize=256) {
   // }
   // const nominators = await api.query.staking.nominators.entries();
   // const nominatorAddresses = nominators.map(([address]) => ""+address.toHuman()[0]);
-  let res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/staking/nominators`)
+  let res = await axios.get(`${DOTASMA_API_BASE}/${CHAIN}/query/staking/nominators`)
   const nominatorAddresses = res?.data?.nominators || []
   console.debug(`the nominator addresses size is ${nominatorAddresses.length}, working in chunks of ${batchSize}`)
   //A too big nominators set could make crush the API => Chunk splitting
@@ -58,7 +58,7 @@ async function getAllNominators (batchSize=256) {
   for (const chunk of nominatorAddressesChucked) {
     console.debug(`${++idx} of ${nominatorAddressesChucked.length} (chunkSize=${chunk.length})`)
     // const accounts = await api.derive.staking.accounts(chunk)
-    res = await axios.post(`${REST_API_BASE}/${CHAIN}/derive/staking/accounts`, { ids: chunk })
+    res = await axios.post(`${DOTASMA_API_BASE}/${CHAIN}/derive/staking/accounts`, { ids: chunk })
     const accounts = res?.data?.accounts || []
     // nominatorsStakings.push(...accounts.map(a => {
     //   return {

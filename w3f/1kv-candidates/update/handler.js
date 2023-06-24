@@ -21,6 +21,7 @@ const MONGO_USERID = env.MONGO_USERID
 const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
 const MONGO_COLLECTION = process.env.MONGO_COLLECTION || '1kv_candidate'
+const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://gateway:8080'
 
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 const FUNCTION = `w3f-1kv-candidates-${CHAIN}-update`
@@ -87,7 +88,7 @@ module.exports = async (event, context) => {
   // const api = await ApiPromise.create({ provider: provider })
   // const active_vals = await getStakingValidators(api)
   // const active_vals = await getStakingValidators()
-  var vals = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/session/validators`)
+  var vals = await axios.get(`${DOTASMA_API_BASE}/${CHAIN}/query/session/validators`)
   // console.log(res.data)
   const active_vals = vals.data || []
 

@@ -1,6 +1,8 @@
-template
-build
 .env
-node_modules
-archive
+archive/**
 metaspan/web-app
+**/node_modules/**
+**/credentials/**
+**/build**
+bullmq/proto/**
+template/**

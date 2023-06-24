@@ -51,8 +51,9 @@ const closeDB = async function () {
   }
 }
 
-const getAccountsMulti = async function (ids=[]) {
-  res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/system/accountMulti`, { params: ids })
+const getAccountsMulti = async function (chain, ids=[]) {
+  console.debug('utils.js: getAccountsMulti', chain, ids)
+  const res = await axios.get(`${REST_API_BASE}/${chain}/query/system/accountMulti`, { params: { ids } })
   console.debug(res.data)
   return res?.data || []
 }
@@ -135,7 +136,7 @@ async function getAllPools (CHAIN) {
     // pool.points = rewardPools.points
     // console.log(pool.rewardPools)
 
-    pool.members = members[pool.id]
+    // pool.members = members[pool.id]
     // console.log(pool.members)
 
     // pool.subPoolStorage = await api.query.nominationPools.subPoolsStorage(pid)
@@ -191,6 +192,7 @@ async function asyncForEach(array, callback) {
 }
 
 export {
+  REST_API_BASE,
   createUrl,
   prepareDB,
   closeDB,

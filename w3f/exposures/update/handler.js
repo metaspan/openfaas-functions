@@ -26,6 +26,8 @@ const MONGO_PORT = env.MONGO_PORT
 const MONGO_USERID = env.MONGO_USERID
 const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
+const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://gateway:8080'
+
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
 
 const MONGO_COLLECTION = "w3f_exposure"
@@ -46,7 +48,7 @@ async function getAllExposures () {
   // Retrieve the active era
   // var activeEra = await api.query.staking.activeEra()
   // activeEra = activeEra.toJSON()
-  var res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/staking/activeEra`)
+  var res = await axios.get(`${DOTASMA_API_BASE}/${CHAIN}/query/staking/activeEra`)
   var activeEra = res?.data?.activeEra || 0
   console.log(activeEra)
   // retrieve all exposures for the active era
@@ -63,7 +65,7 @@ async function getAllExposures () {
   //   exp.chain = chain
   //   list.push(exp)
   // })
-  res = await axios.get(`http://192.168.1.92:3000/${CHAIN}/query/staking/erasStakers?index=${activeEra.index}`)
+  res = await axios.get(`${DOTASMA_API_BASE}/${CHAIN}/query/staking/erasStakers?index=${activeEra.index}`)
   // return list
   return res?.data?.activeEra || []
 }
