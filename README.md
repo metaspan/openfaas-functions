@@ -24,6 +24,19 @@ faas-cli login --password secret123!
 
 `faas-cli registry-login -u derekc --password secret123`
 
+# Build & Deploy
+
+```bash
+cd w3f
+./publish-all.sh
+cd ..
+./deploy-all.sh
+```
+
+```bash
+faas-cli publish --platforms linux/amd64 -f \<filename.yml>
+```
+
 # FUNCTIONS
 
 ## metaspan

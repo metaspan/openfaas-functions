@@ -20,7 +20,7 @@ const MONGO_PASSWD = env.MONGO_PASSWD
 const MONGO_DATABASE = env.MONGO_DATABASE
 const MONGO_COLLECTION = '1kv_nominator'
 const MONGO_CONNECTION_URL = `mongodb://${MONGO_USERID}:${MONGO_PASSWD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`
-const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://gateway:8080'
+const DOTASMA_API_BASE = env.DOTASMA_API_BASE || 'http://192.168.1.92:3000'
 
 const TOKENS = {
   kusama: 'KSM',
