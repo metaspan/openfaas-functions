@@ -45,8 +45,11 @@ const prepareDB = async function () {
   })
 }
 
+function slog (str) { console.log('mongo-logger: ' + str) }
+
 module.exports = async (event, context) => {
 
+  slog('starting...', event.path)
   const fn = event.path.replace('/', '')
   const data = event.body
   const level = event.query.level || 'info'
@@ -61,13 +64,16 @@ module.exports = async (event, context) => {
       function: fn,
       data
     }
+    slog('inserting log record')
     result = await col.insertOne(record)
   } catch (err) {
+    slog('got an error...!')
     console.error(err)
     result = {
       error: err
     }
   }
+  slog('done...' + JSON.stringify(result))
 
   return context
     .status(200)

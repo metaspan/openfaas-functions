@@ -151,13 +151,13 @@ async function getAllPools (CHAIN) {
 
 async function getAllValidators (CHAIN, validator_nominators, batchSize=256) {
 
-  const res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/staking/validators`)
+  var res = await axios.get(`${REST_API_BASE}/${CHAIN}/query/staking/validators`)
   var vals = res?.data?.validators || []
   // get any on-chain identities
   for(var i = 0; i < vals.length; i += batchSize) {
     const ids = vals.slice(i, i + batchSize).map(m => m.stash)
     // const identities = await api.query.identity.identityOf.multi(ids)
-    res = axios.post(`${REST_API_BASE}/${CHAIN}/query/identity/identityOf`, { ids })
+    res = await axios.post(`${REST_API_BASE}/${CHAIN}/query/identity/identityOf`, { ids })
     const identities = res?.data?.identities || []
     // let example = {
     //   "judgements":[[1,{"reasonable":null}]],
