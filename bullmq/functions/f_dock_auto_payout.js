@@ -58,7 +58,7 @@ export async function f_dock_auto_payout (job) {
     signer.decodePkcs8(password);
 
     // Connect to node
-    if(!dock.isConnected) {
+    if (!dock.isConnected) {
       await dock.init({ address: wsProvider, keyring });
     }
     const api = dock.api;
