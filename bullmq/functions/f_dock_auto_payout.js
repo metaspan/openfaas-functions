@@ -58,7 +58,9 @@ export async function f_dock_auto_payout (job) {
     signer.decodePkcs8(password);
 
     // Connect to node
-    await dock.init({ address: wsProvider, keyring });
+    if (!dock.isConnected) {
+      await dock.init({ address: wsProvider, keyring });
+    }
     const api = dock.api;
 
     // Check account balance
