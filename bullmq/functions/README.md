@@ -1,3 +1,6 @@
+# Readme
+
+the main bullmq README.md is [here](../README.md)
 
 # Deployment
 

@@ -109,6 +109,9 @@ export async function f_dock_auto_payout (job) {
     }
  
     if (transactions.length > 0) {
+      // limit transactions to 10 per batch
+      transactions = transactions.slice(0, 10);
+      unclaimedRewards = unclaimedRewards.slice(0, 10);
       console.log(`\x1b[1m -> Unclaimed eras: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
       job.log(`\x1b[1m -> Unclaimed eras: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
 

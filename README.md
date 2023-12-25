@@ -1,3 +1,8 @@
+# README.md
+
+- This readme is for openfaas functions
+- BullMQ [readme here](./bullmq/README.md)
+- BullMQ [development quide here](./bullmq/functions/README.md)
 
 # HOW TO
 

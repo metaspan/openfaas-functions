@@ -4,5 +4,6 @@ metaspan/web-app
 **/node_modules/**
 **/credentials/**
 **/build**
+bullmq/functions/keystores/**
 bullmq/proto/**
 template/**

@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config('../../.env')
+
 // import Telegram from 'telegraf/telegram';
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import axios from 'axios';
@@ -38,11 +41,19 @@ export async function f_check_pool (job) {
 
   // send notification to telegram
   const message = `${chainId} pool active: ${hasActiveValidator}`;
-  const respo = await axios.get(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}`);
-  if(respo.data?.ok) {
-    job.log(`Telegram notification sent`)
-  } else {
-    job.log(`Telegram notification failed`)
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${message}`
+    console.debug('url', url)
+    // job.log(`URL: ${url}`)
+    const respo = await axios.get(url);
+    if(respo.data?.ok) {
+      job.log(`Telegram notification sent`)
+    } else {
+      job.log(`Telegram notification failed`)
+    }
+  } catch (err) {
+    console.error(err)
+    job.error(err)
   }
   // Close the connection
   await api.disconnect();

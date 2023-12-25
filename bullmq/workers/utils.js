@@ -1,6 +1,10 @@
 import { MongoClient } from "mongodb"
 import axios from "axios"
 
+function shortStash(stash) {
+  return stash.slice(0, 6) + '...' + stash.slice(-6)
+}
+
 var _client
 var _dbc
 
