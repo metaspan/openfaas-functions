@@ -18,6 +18,7 @@ export async function f_dock_auto_payout (job) {
   const { wsProvider, accountJSON, password, validators=[], log, } = job.data
 
   console.log("\n\x1b[45m\x1b[1m Dock.io auto payout \x1b[0m\n");
+  console.log(`\x1b[1m - endpoint: ${wsProvider}\x1b[0m`);
   console.log("\x1b[1m - Check source at https://github.com/metaspan/dock-auto-payout\x1b[0m");
   
   // TODO import key from json or ?
@@ -59,8 +60,18 @@ export async function f_dock_auto_payout (job) {
 
     // Connect to node
     if (!dock.isConnected) {
-      await dock.init({ address: wsProvider, keyring });
+      try {
+        await dock.init({ address: wsProvider, keyring });
+      } catch (err) {
+        job.log(`Error occurred ${error}`);
+        job.moveToFailed({ message: "API connection error" }, true);
+      }
     }
+    dock.api.on('error', (error) => {
+      console.error('Error occurred', error);
+      job.log(`Error occurred ${error}`);
+      job.moveToFailed({ message: "API connection error" }, true);
+    });
     const api = dock.api;
 
     // Check account balance
@@ -107,10 +118,19 @@ export async function f_dock_auto_payout (job) {
         }
       }
     }
- 
-    if (transactions.length > 0) {
-      // limit transactions to 10 per batch
-      transactions = transactions.slice(0, 10);
+
+    if(transactions.length === 0) {
+      console.log(`\n\x1b[33m\x1b[1mWarning! There are no unclaimed rewards, exiting!\x1b[0m\n`);
+      job.log(`\n\x1b[33m\x1b[1mWarning! There are no unclaimed rewards, exiting!\x1b[0m\n`);
+    }
+
+    while (transactions.length > 0) {
+      // limit transactions to n per batch
+      const transactionCount = 5
+      const batch = transactions.slice(0, transactionCount);
+      console.debug('batch', batch)
+      job.log('batch', JSON.stringify(batch))
+      transactions = transactions.slice(transactionCount);
       unclaimedRewards = unclaimedRewards.slice(0, 10);
       console.log(`\x1b[1m -> Unclaimed eras: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
       job.log(`\x1b[1m -> Unclaimed eras: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
@@ -121,40 +141,41 @@ export async function f_dock_auto_payout (job) {
       if (phase.toString() === 'Off') {
         console.log('electionProviderMultiPhase.currentPhase() is Off, we can submit the batch')
         job.log('electionProviderMultiPhase.currentPhase() is Off, we can submit the batch')
+
+        // Claim rewards tx
+        const nonce = (await api.derive.balances.account(address)).accountNonce;
+        let blockHash = null;
+        let extrinsicHash = null;
+        let extrinsicStatus = null;
+        // sleep for 3.5 seconds to avoid "Transaction is not valid" error
+        await new Promise(r => setTimeout(r, 3500));
+        await api.tx.utility.batch(batch)
+          .signAndSend(
+            signer,
+            { nonce },
+            ({ events = [], status }) => {
+              extrinsicStatus = status.type
+              if (status.isInBlock) {
+                extrinsicHash = status.asInBlock.toHex()
+              } else if (status.isFinalized) {
+                blockHash = status.asFinalized.toHex()
+              }
+              console.log(extrinsicStatus, extrinsicHash, blockHash)
+            }
+          )
+        console.log(extrinsicStatus, extrinsicHash, blockHash)
+        console.log(`\n\x1b[32m\x1b[1mSuccess! \x1b[37mCheck tx in PolkaScan: https://polkascan.io/kusama/transaction/${blockHash}\x1b[0m\n`);
+
+        if (log) {
+          fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${extrinsicHash}`);
+        }
+
       } else {
         console.log(`electionProviderMultiPhase.currentPhase() is ${phase.toString()}, we can NOT submit the batch`)
         job.log(`electionProviderMultiPhase.currentPhase() is ${phase.toString()}, we can NOT submit the batch`)
-        process.exit(1)
+        // process.exit(1)
       }
 
-      // Claim rewards tx
-      const nonce = (await api.derive.balances.account(address)).accountNonce;
-      let blockHash = null;
-      let extrinsicHash = null;
-      let extrinsicStatus = null;
-      await api.tx.utility.batch(transactions)
-        .signAndSend(
-          signer,
-          { nonce },
-          ({ events = [], status }) => {
-            extrinsicStatus = status.type
-            if (status.isInBlock) {
-              extrinsicHash = status.asInBlock.toHex()
-            } else if (status.isFinalized) {
-              blockHash = status.asFinalized.toHex()
-            }
-            console.log(extrinsicStatus, extrinsicHash, blockHash)
-          }
-        )
-      console.log(extrinsicStatus, extrinsicHash, blockHash)
-      console.log(`\n\x1b[32m\x1b[1mSuccess! \x1b[37mCheck tx in PolkaScan: https://polkascan.io/kusama/transaction/${blockHash}\x1b[0m\n`);
-
-      if (log) {
-        fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${extrinsicHash}`);
-      }
-    } else {
-      console.log(`\n\x1b[33m\x1b[1mWarning! There are no unclaimed rewards, exiting!\x1b[0m\n`);
-      job.log(`\n\x1b[33m\x1b[1mWarning! There are no unclaimed rewards, exiting!\x1b[0m\n`);
     }
     await dock.disconnect()
   }
