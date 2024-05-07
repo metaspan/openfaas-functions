@@ -15,11 +15,14 @@ export async function f_w3f_exposures_update (job) {
   const MONGO_COLLECTION = 'w3f_exposure'
   const MONGO_CONNECTION_URL = createUrl()
 
+  job.log(`w3f-exposures-update... ${CHAIN}`)
+
   var dbc
   var result
 
   const exposures = await getAllExposures(CHAIN)
   console.debug('# exposures', exposures.length)
+  job.log(`# exposures: ${exposures.length}`)
 
   // update the db
   try {

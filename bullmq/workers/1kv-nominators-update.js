@@ -11,6 +11,7 @@ export async function f_1kv_nominators_update (job) {
   // Will print { foo: 'bar'} for the first job
   // and { qux: 'baz' } for the second.
   console.log(job.data);
+  job.log('1kv-nominators-update starting')
 
   const { MONGO_DATABASE } = process.env
   const { CHAIN } = job.data
@@ -35,19 +36,25 @@ export async function f_1kv_nominators_update (job) {
 
   if (res && res.data) {
     const nominators = res.data
+    job.log(`nominators: ${nominators.length}`)
     // update the db
     try {
       dbc = await prepareDB(MONGO_CONNECTION_URL, MONGO_DATABASE)
       const col = dbc.collection(MONGO_COLLECTION)
+      const updatedAt = moment().utc().format()
       nominators.forEach(async (nominator) => {
         const query = {
           _id: nominator._id,
           // stash: nominator.stash
         }
         nominator.chain = CHAIN
-        nominator.updatedAt = moment().utc().format()
+        nominator.updatedAt = updatedAt
         const result = await col.replaceOne(query, nominator, { upsert: true })
       })
+      // delete old records where updatedAt is not current
+      const deleteResult = await col.deleteMany({ updatedAt: { $ne: updatedAt } })
+      // console.log('deleteResult', deleteResult)
+      job.log(`nominators_deleted: ${deleteResult.deletedCount}`)
       result = {
         nominators_updated: nominators.length,
         nominators: nominators.map(n => { return { _id: n._id, stash: n.stash } }),
@@ -71,5 +78,7 @@ export async function f_1kv_nominators_update (job) {
     }
   }
   console.log('1kv-nominators-update done...', CHAIN)
+  job.log(`1kv-nominators-update done... ${CHAIN}`)
+  return result
 
 }

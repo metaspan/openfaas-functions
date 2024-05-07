@@ -195,6 +195,19 @@ async function asyncForEach(array, callback) {
   }
 }
 
+class Logger {
+  constructor({ job, fn }) {
+    this.job = job
+    this.fn = fn
+    this.job.log(`starting ${fn}`)
+  }
+  log (...args) {
+    console.log(args)
+    // concat args into a string valuye
+    this.job.log(args.map(a => a.toString()).join(' '))
+  }
+}
+
 export {
   REST_API_BASE,
   createUrl,

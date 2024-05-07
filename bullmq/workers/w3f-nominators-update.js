@@ -4,7 +4,7 @@
 import moment from 'moment'
 import { createUrl, prepareDB, closeDB, getAllNominators } from './utils.js'
 
-function slog (str) { console.log('w3f-exposures:' + str) }
+function slog (str) { console.log('w3f-nominators:' + str) }
 
 export async function f_w3f_nominators_update (job) {
   // WARNING, this could print the db password!

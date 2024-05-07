@@ -4,7 +4,7 @@
 import moment from 'moment'
 import { createUrl, prepareDB, getAllNominators, getAllValidators } from './utils.js'
 
-function slog (str) { console.log('w3f-exposures:' + str) }
+function slog (str) { console.log('w3f-validators-update:' + str) }
 
 export async function f_w3f_validators_update (job) {
 
