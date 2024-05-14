@@ -22,23 +22,23 @@ functions:
     environment:
       CHAIN: polkadot
 
-  w3f-1kv-candidates-kusama-update:
-    lang: node12
-    handler: ./1kv-candidates/update
-    image: derekc/w3f-1kv-candidates-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: kusama
-    # annotations:
-    #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
-  w3f-1kv-candidates-polkadot-update:
-    lang: node12
-    handler: ./1kv-candidates/update
-    image: derekc/w3f-1kv-candidates-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: polkadot
-    # annotations:
-    #   schedule: "2 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  # w3f-1kv-candidates-kusama-update:
+  #   lang: node12
+  #   handler: ./1kv-candidates/update
+  #   image: derekc/w3f-1kv-candidates-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: kusama
+  #   # annotations:
+  #   #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  # w3f-1kv-candidates-polkadot-update:
+  #   lang: node12
+  #   handler: ./1kv-candidates/update
+  #   image: derekc/w3f-1kv-candidates-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: polkadot
+  #   # annotations:
+  #   #   schedule: "2 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek

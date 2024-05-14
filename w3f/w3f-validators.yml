@@ -22,29 +22,29 @@ functions:
     environment:
       CHAIN: polkadot
 
-  w3f-validators-kusama-update:
-    # lang: node18-dc
-    lang: node18
-    handler: ./validators/update
-    image: derekc/w3f-validators-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: kusama
-    # annotations:
-    #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
-  w3f-validators-polkadot-update:
-    # lang: node18-dc
-    lang: node18
-    handler: ./validators/update
-    image: derekc/w3f-validators-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: polkadot
-    # annotations:
-    #   topic: cron-function
-    #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  # w3f-validators-kusama-update:
+  #   # lang: node18-dc
+  #   lang: node18
+  #   handler: ./validators/update
+  #   image: derekc/w3f-validators-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: kusama
+  #   # annotations:
+  #   #   schedule: "1 * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
+  # w3f-validators-polkadot-update:
+  #   # lang: node18-dc
+  #   lang: node18
+  #   handler: ./validators/update
+  #   image: derekc/w3f-validators-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: polkadot
+  #   # annotations:
+  #   #   topic: cron-function
+  #   #   schedule: "* * * * *" # minute, hour, dayOfMonth, month, dayOfWeek
 
 
   w3f-validator-location-stats-kusama:
@@ -64,19 +64,19 @@ functions:
     environment:
       CHAIN: polkadot
 
-  w3f-validator-location-stats-kusama-update:
-    lang: node12
-    handler: ./validator-location-stats/update
-    image: derekc/w3f-validator-location-stats-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: kusama
-  w3f-validator-location-stats-polkadot-update:
-    lang: node12
-    handler: ./validator-location-stats/update
-    image: derekc/w3f-validator-location-stats-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: polkadot
+  # w3f-validator-location-stats-kusama-update:
+  #   lang: node12
+  #   handler: ./validator-location-stats/update
+  #   image: derekc/w3f-validator-location-stats-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: kusama
+  # w3f-validator-location-stats-polkadot-update:
+  #   lang: node12
+  #   handler: ./validator-location-stats/update
+  #   image: derekc/w3f-validator-location-stats-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: polkadot

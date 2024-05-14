@@ -24,21 +24,21 @@ functions:
       CHAIN: polkadot
       # LOGGER_HOST: ${GATEWAY_IP}
 
-  w3f-pools-kusama-update:
-    lang: node18-dc
-    handler: ./pools/update
-    image: derekc/w3f-pools-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: kusama
-      # LOGGER_HOST: ${GATEWAY_IP}
-  w3f-pools-polkadot-update:
-    lang: node18-dc
-    handler: ./pools/update
-    image: derekc/w3f-pools-update:latest
-    secrets:
-    - dotenv
-    environment:
-      CHAIN: polkadot
-      # LOGGER_HOST: ${GATEWAY_IP}
+  # w3f-pools-kusama-update:
+  #   lang: node18-dc
+  #   handler: ./pools/update
+  #   image: derekc/w3f-pools-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: kusama
+  #     # LOGGER_HOST: ${GATEWAY_IP}
+  # w3f-pools-polkadot-update:
+  #   lang: node18-dc
+  #   handler: ./pools/update
+  #   image: derekc/w3f-pools-update:latest
+  #   secrets:
+  #   - dotenv
+  #   environment:
+  #     CHAIN: polkadot
+  #     # LOGGER_HOST: ${GATEWAY_IP}
